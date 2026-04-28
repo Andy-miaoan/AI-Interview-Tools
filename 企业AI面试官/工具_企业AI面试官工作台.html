@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>企业AI面试官 · HR智能工作台</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f0f2f5;color:#333}
+.login-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:linear-gradient(135deg,#0a0a1a,#0f0f2e,#0a0a1a);z-index:999;display:flex;align-items:center;justify-content:center;flex-direction:column}
+.login-card{background:#fff;border-radius:20px;padding:40px 30px;max-width:420px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.login-card .icon{font-size:48px;margin-bottom:12px}
+.login-card h2{font-size:20px;margin-bottom:4px;color:#1a1a2e}
+.login-card .subt{font-size:13px;color:#999;margin-bottom:24px}
+.login-card input{width:100%;padding:12px 16px;border:2px solid #e0e0e0;border-radius:10px;font-size:18px;text-align:center;letter-spacing:3px;font-family:'Courier New',monospace;text-transform:uppercase}
+.login-card input:focus{outline:none;border-color:#5b6eff}
+.login-card .btn{width:100%;padding:12px;border:none;border-radius:10px;font-size:16px;font-weight:600;cursor:pointer;margin-top:12px;transition:.2s}
+.login-card .btn-activate{background:linear-gradient(135deg,#5b6eff,#4a4fcf);color:#fff}
+.login-card .btn-activate:hover{opacity:.9}
+.login-card .btn-activate:disabled{opacity:.5;cursor:not-allowed}
+.login-err{color:#e74c3c;font-size:12px;margin-top:6px;min-height:18px}
+.login-info{font-size:11px;color:#aaa;margin-top:16px;line-height:1.6}
+.wechat-bind-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.6);z-index:1000;display:none;align-items:center;justify-content:center}
+.wechat-bind-overlay.show{display:flex}
+.wechat-bind-card{background:#fff;border-radius:16px;padding:28px 24px;max-width:380px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.3);animation:slideUp .3s ease}
+@keyframes slideUp{from{transform:translateY(30px);opacity:0}to{transform:translateY(0);opacity:1}}
+.wechat-bind-card .icon{font-size:40px;margin-bottom:8px}
+.wechat-bind-card h3{font-size:18px;margin-bottom:4px}
+.wechat-bind-card .subt{font-size:12px;color:#999;margin-bottom:16px;line-height:1.6}
+.wechat-bind-card .benefits{text-align:left;font-size:12px;color:#666;margin-bottom:14px;line-height:1.8}
+.wechat-bind-card .benefits span{color:#5b6eff}
+.wechat-bind-card input{width:100%;padding:10px 14px;border:2px solid #e0e0e0;border-radius:10px;font-size:15px;text-align:center}
+.wechat-bind-card input:focus{outline:none;border-color:#5b6eff}
+.wechat-bind-card .btn{width:100%;padding:11px;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;margin-top:10px;transition:.2s}
+.wechat-bind-card .btn-save{background:linear-gradient(135deg,#5b6eff,#4a4fcf);color:#fff}
+.wechat-bind-card .btn-save:hover{opacity:.9}
+.wechat-bind-card .btn-skip{background:none;color:#aaa;font-size:13px;font-weight:400;margin-top:6px}
+.app{max-width:860px;margin:0 auto;min-height:100vh;display:none}
+.app.show{display:block}
+.header{background:linear-gradient(135deg,#1a1a2e,#16213e);color:#fff;padding:16px 20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+.header h1{font-size:18px}
+.header .user-bar{font-size:11px;opacity:.9;text-align:right;line-height:1.5}
+.user-bar .remaining{color:#5b9eff;font-weight:600}
+.contact-bar{background:#e8edff;border-bottom:1px solid #c4d0ff;padding:8px 16px;text-align:center;font-size:12px;color:#3a4fa0;display:none}
+.contact-bar.show{display:block}
+.contact-bar .wx-btn{display:inline-block;background:#5b6eff;color:#fff;padding:4px 12px;border-radius:10px;font-size:11px;margin-left:6px;cursor:pointer;font-weight:600}
+.tabs{display:flex;background:#fff;overflow-x:auto;position:sticky;top:0;z-index:10;border-bottom:1px solid #e8e8e8;-webkit-overflow-scrolling:touch}
+.tab{flex-shrink:0;padding:12px 10px;text-align:center;font-size:11px;cursor:pointer;border:none;background:none;color:#888;border-bottom:2px solid transparent;transition:.2s;white-space:nowrap}
+.tab:hover{color:#333;background:#fafafa}
+.tab.active{color:#1a1a2e;border-bottom-color:#5b6eff;font-weight:600}
+.main{padding:16px}
+.panel{display:none}
+.panel.active{display:block}
+.card{background:#fff;border-radius:14px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.06);margin-bottom:12px}
+.card h3{font-size:16px;margin-bottom:2px}
+.card .desc{font-size:12px;color:#999;margin-bottom:16px}
+label{display:block;font-size:13px;font-weight:600;color:#555;margin:12px 0 4px}
+textarea,input[type="text"]{width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;line-height:1.6;font-family:inherit;resize:vertical}
+textarea:focus,input:focus{outline:none;border-color:#5b6eff;box-shadow:0 0 0 3px rgba(91,110,255,.08)}
+.btn-row{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+.btn{padding:10px 20px;border:none;border-radius:8px;font-size:14px;cursor:pointer;font-weight:600;transition:.2s;white-space:nowrap}
+.btn-primary{background:#5b6eff;color:#fff}
+.btn-primary:hover{background:#4a5eef}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed}
+.btn-secondary{background:#f0f0f0;color:#555}
+.btn-secondary:hover{background:#e4e4e4}
+.btn-outline{background:#fff;color:#5b6eff;border:1px solid #5b6eff}
+.result-box{display:none;margin-top:14px;padding:16px;background:#fafbfc;border:1px solid #e0e0e0;border-radius:10px;font-size:13px;line-height:1.8;white-space:pre-wrap;max-height:500px;overflow-y:auto}
+.result-box.show{display:block}
+.result-box.loading{color:#999;text-align:center;padding:30px}
+.spinner{display:inline-block;width:20px;height:20px;border:2px solid #ddd;border-top-color:#5b6eff;border-radius:50%;animation:spin .8s linear infinite;vertical-align:middle;margin-right:8px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:10px 22px;border-radius:20px;font-size:13px;z-index:999;opacity:0;transition:.3s;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1}
+.toast.warn{background:#e74c3c}
+.wechat-footer{background:#f8f9fa;border-top:1px solid #eee;padding:8px 16px;text-align:center;font-size:11px;color:#999}
+.wechat-footer .wx-badge{display:inline-flex;align-items:center;gap:4px;background:#5b6eff;color:#fff;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600;cursor:pointer;transition:.2s}
+.wechat-footer .wx-badge:hover{opacity:.85}
+.mode-switch{display:flex;gap:4px;background:#f0f0f0;border-radius:8px;padding:3px;margin-bottom:12px}
+.mode-btn{flex:1;padding:7px 12px;border:none;border-radius:6px;font-size:12px;cursor:pointer;background:none;color:#888;transition:.2s}
+.mode-btn.active{background:#fff;color:#333;font-weight:600;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.instruction{background:#e8edff;padding:10px 14px;border-radius:8px;font-size:12px;color:#3a4fa0;margin-top:10px;line-height:1.7}
+.instruction strong{color:#1a2a6e}
+@media(max-width:480px){
+    .header h1{font-size:14px}
+    .tab{padding:10px 6px;font-size:10px}
+    .card{padding:16px}
+}
+</style>
+</head>
+<body>
+
+<!-- 激活码登录 -->
+<div class="login-overlay" id="loginScreen">
+    <div class="login-card">
+        <div class="icon">🏢</div>
+        <h2>企业AI面试官</h2>
+        <div class="subt">JD优化 · 简历筛选 · 面试题库 · 面试分析 · 试用期辅导<br>输入激活码开始使用</div>
+        <input type="text" id="activationInput" placeholder="请输入激活码（复制完整激活码到这里）" maxlength="200" autocomplete="off">
+        <div class="login-err" id="loginErr"></div>
+        <button class="btn btn-activate" id="activateBtn" onclick="activate()">🚀 激活使用</button>
+        <div class="login-info">还没有激活码？<br>💬 加微信：miaoan1913 获取</div>
+    </div>
+</div>
+
+<!-- 微信绑定 -->
+<div class="wechat-bind-overlay" id="wechatBindOverlay">
+    <div class="wechat-bind-card">
+        <div class="icon">📱</div>
+        <h3>绑定微信，不怕到期</h3>
+        <div class="subt">到期前3天微信自动提醒续费<br>避免工作中突然中断</div>
+        <div class="benefits"><span>✅</span> 到期前3天微信提醒续费<br><span>✅</span> 换设备时一键恢复会员<br><span>✅</span> 新功能上线第一时间通知<br><span>🚫</span> 不打扰、不群发、不营销</div>
+        <input type="text" id="wechatInput" placeholder="输入微信号或手机号（选填）">
+        <button class="btn btn-save" onclick="saveWechat()">💙 绑定，开始使用</button>
+        <button class="btn btn-skip" onclick="skipWechat()">先跳过，直接使用</button>
+    </div>
+</div>
+
+<!-- 主界面 -->
+<div class="app" id="mainApp">
+    <div class="header">
+        <div><h1>🏢 企业AI面试官</h1></div>
+        <div class="user-bar">
+            <div id="userName"></div>
+            <div>剩余：<span class="remaining" id="remainingUses">-</span> 次 · 到期：<span id="expiryDate">-</span></div>
+            <div id="wechatBound" style="display:none;margin-top:2px"><span style="color:#5b9eff">💙</span> 已绑定：<span id="boundWechat"></span></div>
+        </div>
+    </div>
+    <div class="contact-bar" id="contactBar">
+        ⚠️ <span id="contactBarMsg">即将到期</span>
+        <span class="wx-btn" onclick="copyWechat()">📋 一键复制客服微信</span>
+    </div>
+    <div class="tabs">
+        <button class="tab active" onclick="switchTab('jd')">📋 JD优化</button>
+        <button class="tab" onclick="switchTab('screen')">🔎 简历筛选</button>
+        <button class="tab" onclick="switchTab('qbank')">📚 面试题库</button>
+        <button class="tab" onclick="switchTab('analysis')">🔍 面试分析</button>
+        <button class="tab" onclick="switchTab('probation')">🛡️ 试用期</button>
+    </div>
+    <div class="main">
+    <!-- JD优化 -->
+    <div class="panel active" id="panel-jd">
+        <div class="card">
+            <h3>📋 JD智能优化</h3>
+            <div class="desc">诊断原JD问题 → 逐条改写 → 输出完整优化稿 + 配套面试题</div>
+            <label>岗位名称</label>
+            <input type="text" id="jd-title" placeholder="如：直播运营主管">
+            <label>原始JD</label>
+            <textarea id="jd-content" rows="8" placeholder="粘贴原始JD..."></textarea>
+            <label>公司亮点（选填）</label>
+            <textarea id="jd-highlights" rows="2" placeholder="如：双休、15薪、不打卡、核心项目..."></textarea>
+            <div class="btn-row">
+                <button class="btn btn-primary" onclick="processJD()">🔧 AI优化JD</button>
+                <button class="btn btn-secondary" onclick="clearJD()">清空</button>
+            </div>
+            <div class="result-box" id="jd-result"></div>
+            <button class="btn btn-outline" id="jd-copy-btn" style="display:none;margin-top:8px" onclick="copyResult('jd-result')">📋 复制结果</button>
+        </div>
+    </div>
+
+    <!-- 简历筛选 -->
+    <div class="panel" id="panel-screen">
+        <div class="card">
+            <h3>🔎 简历智能筛选</h3>
+            <div class="desc">粘贴JD + 简历 → AI打分匹配度 + 风险提示 + 面试建议</div>
+            <label>岗位JD（核心要求3-5条即可）</label>
+            <textarea id="screen-jd" rows="4" placeholder="粘贴岗位核心要求..."></textarea>
+            <label>候选人简历</label>
+            <textarea id="screen-resume" rows="8" placeholder="粘贴候选人简历..."></textarea>
+            <div class="btn-row">
+                <button class="btn btn-primary" onclick="processScreen()">🔎 AI评估匹配度</button>
+                <button class="btn btn-secondary" onclick="clearScreen()">清空</button>
+            </div>
+            <div class="result-box" id="screen-result"></div>
+            <button class="btn btn-outline" id="screen-copy-btn" style="display:none;margin-top:8px" onclick="copyResult('screen-result')">📋 复制结果</button>
+            <div class="instruction">💡 AI按匹配度打分（1-10），输出匹配点、不匹配点、风险提示、面试建议。可批量粘贴多份简历逐份评估。</div>
+        </div>
+    </div>
+
+    <!-- 面试题库 -->
+    <div class="panel" id="panel-qbank">
+        <div class="card">
+            <h3>📚 面试题库生成</h3>
+            <div class="desc">根据岗位生成初面+复试+终面三套分层题库 + 评分标准</div>
+            <label>岗位名称</label>
+            <input type="text" id="qbank-position" placeholder="如：电商运营经理">
+            <label>级别</label>
+            <input type="text" id="qbank-level" placeholder="初级 / 中级 / 高级 / 管理岗">
+            <label>核心要求（3-5条）</label>
+            <textarea id="qbank-requirements" rows="3" placeholder="逐条列出岗位核心要求..."></textarea>
+            <div class="btn-row">
+                <button class="btn btn-primary" onclick="processQBank()">📚 生成题库</button>
+                <button class="btn btn-secondary" onclick="clearQBank()">清空</button>
+            </div>
+            <div class="result-box" id="qbank-result"></div>
+            <button class="btn btn-outline" id="qbank-copy-btn" style="display:none;margin-top:8px" onclick="copyResult('qbank-result')">📋 复制结果</button>
+        </div>
+    </div>
+
+    <!-- 面试分析 -->
+    <div class="panel" id="panel-analysis">
+        <div class="card">
+            <h3>🔍 面试后分析</h3>
+            <div class="desc">粘贴面试录音转写 → 7维度结构化评估报告</div>
+            <label>岗位名称</label>
+            <input type="text" id="analysis-position" placeholder="候选人面试的岗位">
+            <label>面试录音转写文字</label>
+            <textarea id="analysis-content" rows="10" placeholder="粘贴录音转文字内容（用飞书妙记/通义听悟/讯飞听见转写后粘贴全文）..."></textarea>
+            <div class="btn-row">
+                <button class="btn btn-primary" onclick="processAnalysis()">🔍 开始分析</button>
+                <button class="btn btn-secondary" onclick="clearAnalysis()">清空</button>
+            </div>
+            <div class="result-box" id="analysis-result"></div>
+            <button class="btn btn-outline" id="analysis-copy-btn" style="display:none;margin-top:8px" onclick="copyResult('analysis-result')">📋 复制结果</button>
+            <div class="instruction">💡 输出：整体评价→逐题分析→STAR完整度→隐性信号→一致性检查→追问建议→录用风险评估，7个维度全覆盖。</div>
+        </div>
+    </div>
+
+    <!-- 试用期辅导 -->
+    <div class="panel" id="panel-probation">
+        <div class="card">
+            <h3>🛡️ 试用期辅导</h3>
+            <div class="desc">生成试用期管理计划 / 风险诊断</div>
+            <div class="mode-switch">
+                <button class="mode-btn active" id="mode-plan" onclick="switchProbMode('plan')">📅 试用期计划</button>
+                <button class="mode-btn" id="mode-risk" onclick="switchProbMode('risk')">⚠️ 风险诊断</button>
+            </div>
+            <div id="planFields">
+                <label>岗位</label><input type="text" id="prob-position" placeholder="如：新媒体运营">
+                <label>级别</label><input type="text" id="prob-level" placeholder="初级 / 中级 / 高级">
+                <label>试用期</label><input type="text" id="prob-duration" placeholder="默认3个月">
+                <label>团队规模</label><input type="text" id="prob-teamsize" placeholder="如：5人">
+                <label>主管风格（选填）</label><input type="text" id="prob-style" placeholder="放手型 / 细节型 / 结果型">
+            </div>
+            <div id="riskFields" style="display:none">
+                <label>岗位</label><input type="text" id="prob-risk-pos" placeholder="岗位名称">
+                <label>已入职</label><input type="text" id="prob-risk-time" placeholder="如：第3周">
+                <label>观察到的表现</label>
+                <textarea id="prob-risk-obs" rows="4" placeholder="如：午饭常一个人吃、很少主动提问、上周报告有明显错误..."></textarea>
+            </div>
+            <div class="btn-row">
+                <button class="btn btn-primary" onclick="processProbation()">🛡️ 开始处理</button>
+                <button class="btn btn-secondary" onclick="clearProb()">清空</button>
+            </div>
+            <div class="result-box" id="probation-result"></div>
+            <button class="btn btn-outline" id="probation-copy-btn" style="display:none;margin-top:8px" onclick="copyResult('probation-result')">📋 复制结果</button>
+        </div>
+    </div>
+    </div>
+    <div class="wechat-footer">
+        💬 客服微信：<span style="color:#5b6eff;font-weight:600">miaoan1913</span>
+        <span class="wx-badge" onclick="copyWechat()">📋 复制微信号</span>
+    </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const SECRET = "miaoan1913_AI_HR_ENTERPRISE_2026";
+const DEEPSEEK_API_KEY = '';
+const DEEPSEEK_API_URL = 'https://api.deepseek.com/v1/chat/completions';
+let probMode = 'plan';
+
+function decrypt(encoded, key) {
+    try {
+        encoded = encoded.replace(/[\._]/g, c => ({'.':'+','_':'/'}[c]));
+        while (encoded.length % 4) encoded += '=';
+        let bytes = atob(encoded);
+        let result = '';
+        for (let i = 0; i < bytes.length; i += 2) {
+            let hi = bytes.charCodeAt(i) & 0xFF;
+            let lo = bytes.charCodeAt(i + 1) & 0xFF;
+            let c = (hi << 8) | lo;
+            result += String.fromCharCode(c ^ key.charCodeAt((i / 2) % key.length));
+        }
+        return result;
+    } catch(e) { return ''; }
+}
+
+function simpleHash(str) {
+    let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+    for (let i = 0; i < str.length; i++) {
+        let ch = str.charCodeAt(i);
+        h1 = Math.imul(h1 ^ ch, 2654435761);
+        h2 = Math.imul(h2 ^ ch, 1597334677);
+    }
+    h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507);
+    h2 = Math.imul(h2 ^ (h2 >>> 16), 3266489909);
+    return (h1 ^ h2) >>> 0;
+}
+
+function validateCode(rawCode) {
+    const clean = rawCode.replace(/[-\s]/g, '');
+    if (clean.length < 12) return { valid: false, error: '激活码格式错误' };
+    const hashPart = clean.slice(-4).toUpperCase();
+    const dataPart = clean.slice(0, -4);
+    if (hashPart !== simpleHash(dataPart + SECRET).toString(16).slice(0, 4).toUpperCase()) return { valid: false, error: '激活码无效' };
+    const payload = decrypt(dataPart, SECRET);
+    if (!payload) return { valid: false, error: '激活码数据损坏' };
+    const parts = payload.split('|');
+    if (parts.length < 4) return { valid: false, error: '激活码数据损坏' };
+    const expiry = new Date(parts[0] + 'T23:59:59');
+    if (new Date() > expiry) return { valid: false, error: '激活码已于 '+parts[0]+' 过期' };
+    return { valid: true, userName: parts[2], expiry: parts[0], maxUses: parseInt(parts[1]), expiryDate: expiry };
+}
+
+function getUsageKey(code) { return 'hrpro_usage_' + simpleHash(code.replace(/[-\s]/g, '').toUpperCase()).toString(16); }
+function getUsage(code) { return JSON.parse(localStorage.getItem(getUsageKey(code)) || '{"uses":0,"firstUse":null}'); }
+function incrementUsage(code) {
+    const key = getUsageKey(code);
+    const data = getUsage(code);
+    data.uses++;
+    if (!data.firstUse) data.firstUse = new Date().toISOString().slice(0, 10);
+    localStorage.setItem(key, JSON.stringify(data));
+    return data;
+}
+
+let currentSession = null;
+
+function activate() {
+    const input = document.getElementById('activationInput').value.trim();
+    const errEl = document.getElementById('loginErr');
+    const btn = document.getElementById('activateBtn');
+    if (!input) { errEl.textContent = '请输入激活码'; return; }
+    const storageKey = 'hrpro_activation_' + simpleHash(input.replace(/[-\s]/g, '').toUpperCase()).toString(16);
+    const cached = localStorage.getItem(storageKey);
+    let validation;
+    if (cached) {
+        validation = JSON.parse(cached);
+        if (new Date() > new Date(validation.expiry + 'T23:59:59')) { localStorage.removeItem(storageKey); errEl.textContent = '激活码已过期，请续费'; return; }
+    } else {
+        validation = validateCode(input);
+        if (!validation.valid) { errEl.textContent = validation.error; return; }
+        localStorage.setItem(storageKey, JSON.stringify(validation));
+    }
+    const usage = getUsage(input);
+    if (validation.maxUses > 0 && usage.uses >= validation.maxUses) { errEl.textContent = '次数已用完，请联系续费'; return; }
+    currentSession = { code: input, userName: validation.userName, expiry: validation.expiry, maxUses: validation.maxUses, storageKey };
+    const boundWx = localStorage.getItem('hrpro_bound_wechat');
+    if (boundWx) {
+        btn.disabled = true; btn.textContent = '✅ 激活成功！欢迎回来';
+        setTimeout(() => { document.getElementById('loginScreen').style.display = 'none'; document.getElementById('mainApp').classList.add('show'); updateUserBar(); }, 400);
+    } else {
+        btn.disabled = true; btn.textContent = '✅ 激活成功！';
+        setTimeout(() => { document.getElementById('wechatBindOverlay').classList.add('show'); }, 300);
+    }
+}
+
+function saveWechat() { const wx = document.getElementById('wechatInput').value.trim(); if (wx) { localStorage.setItem('hrpro_bound_wechat', wx); showToast('✅ 微信已绑定！到期前3天自动提醒'); } enterApp(); }
+function skipWechat() { showToast('💡 可随时在底部点击"复制微信号"添加客服'); enterApp(); }
+function enterApp() { document.getElementById('wechatBindOverlay').classList.remove('show'); document.getElementById('loginScreen').style.display = 'none'; document.getElementById('mainApp').classList.add('show'); updateUserBar(); }
+function copyWechat() { navigator.clipboard.writeText('miaoan1913').then(() => showToast('✅ 已复制客服微信：miaoan1913，去微信添加好友即可')).catch(() => showToast('📋 客服微信：miaoan1913（请手动搜索添加）')); }
+
+function updateUserBar() {
+    if (!currentSession) return;
+    const usage = getUsage(currentSession.code);
+    const remaining = currentSession.maxUses === 0 ? '不限' : Math.max(0, currentSession.maxUses - usage.uses);
+    document.getElementById('userName').textContent = '🏢 ' + currentSession.userName;
+    document.getElementById('remainingUses').textContent = remaining;
+    document.getElementById('expiryDate').textContent = currentSession.expiry;
+    const boundWx = localStorage.getItem('hrpro_bound_wechat');
+    if (boundWx) { document.getElementById('wechatBound').style.display = 'block'; document.getElementById('boundWechat').textContent = boundWx; }
+    const daysLeft = Math.ceil((new Date(currentSession.expiry + 'T23:59:59') - new Date()) / 86400000);
+    const bar = document.getElementById('contactBar'), msg = document.getElementById('contactBarMsg');
+    if (daysLeft <= 7 && daysLeft > 0) { bar.classList.add('show'); msg.textContent = '还有 '+daysLeft+' 天到期'; }
+    else if (daysLeft <= 0) { bar.classList.add('show'); msg.textContent = '已到期，续费后恢复'; }
+    else if (currentSession.maxUses > 0 && remaining <= 10 && remaining > 0) { bar.classList.add('show'); msg.textContent = '仅剩 '+remaining+' 次使用'; }
+    else { bar.classList.remove('show'); }
+    if (daysLeft <= 7) document.getElementById('expiryDate').style.color = '#ff6b6b';
+}
+
+function checkAndUse() {
+    if (!currentSession) { document.getElementById('loginScreen').style.display = 'flex'; document.getElementById('mainApp').classList.remove('show'); return false; }
+    if (new Date() > new Date(currentSession.expiry + 'T23:59:59')) { document.getElementById('loginErr').textContent = '已到期，请加微信 miaoan1913 续费'; logout(); return false; }
+    const usage = getUsage(currentSession.code);
+    if (currentSession.maxUses > 0 && usage.uses >= currentSession.maxUses) { showToast('次数已用完，请加微信 miaoan1913 续费', true); updateUserBar(); return false; }
+    incrementUsage(currentSession.code); updateUserBar(); return true;
+}
+
+function logout() {
+    currentSession = null;
+    ['loginScreen','mainApp','activationInput','loginErr','contactBar'].forEach(id => {
+        const el = document.getElementById(id);
+        if (id === 'loginScreen') el.style.display = 'flex';
+        else if (id === 'mainApp') el.classList.remove('show');
+        else if (id === 'activationInput') el.value = '';
+        else if (id === 'loginErr') el.textContent = '';
+        else if (id === 'contactBar') el.classList.remove('show');
+    });
+    document.getElementById('activateBtn').disabled = false;
+    document.getElementById('activateBtn').textContent = '🚀 激活使用';
+}
+
+function switchTab(n) { document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active')); document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active')); document.querySelector('.tab[onclick*="'+n+'"]').classList.add('active'); document.getElementById('panel-'+n).classList.add('active'); }
+function switchProbMode(m) { probMode=m; document.getElementById('mode-plan').className=m==='plan'?'mode-btn active':'mode-btn'; document.getElementById('mode-risk').className=m==='risk'?'mode-btn active':'mode-btn'; document.getElementById('planFields').style.display=m==='plan'?'block':'none'; document.getElementById('riskFields').style.display=m==='risk'?'block':'none'; }
+function showToast(msg,w) { const t=document.getElementById('toast'); t.textContent=msg; t.className='toast'+(w?' warn':''); t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2000); }
+function copyResult(id) { navigator.clipboard.writeText(document.getElementById(id).textContent).then(()=>showToast('✅ 已复制！')); }
+function showResult(id,text,btnId) { const b=document.getElementById(id); b.textContent=text; b.classList.remove('loading'); b.classList.add('show'); if(btnId)document.getElementById(btnId).style.display='inline-block'; b.scrollIntoView({behavior:'smooth',block:'center'}); }
+function showLoading(id) { const b=document.getElementById(id); b.innerHTML='<span class="spinner"></span> AI正在处理中，请稍候...'; b.classList.add('show','loading'); b.scrollIntoView({behavior:'smooth',block:'center'}); }
+
+async function callDeepSeek(s,p) {
+    if(!DEEPSEEK_API_KEY)return null;
+    try{const r=await fetch(DEEPSEEK_API_URL,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+DEEPSEEK_API_KEY},body:JSON.stringify({model:'deepseek-chat',messages:[{role:'system',content:s},{role:'user',content:p}],temperature:.7,max_tokens:3000})});if(!r.ok)return null;return(await r.json()).choices?.[0]?.message?.content||null}catch(e){return null}
+}
+
+// ---- JD优化 ----
+async function processJD() { if(!checkAndUse())return; const t=document.getElementById('jd-title').value.trim(); const c=document.getElementById('jd-content').value.trim(); const h=document.getElementById('jd-highlights').value.trim(); if(!c){showToast('请粘贴JD原文',true);return} showLoading('jd-result'); document.getElementById('jd-copy-btn').style.display='none'; const s='你是懂业务的人力资源顾问。请按以下步骤优化JD：\n步骤1：诊断3个致命问题（吸引力/可筛选性/真实性）\n步骤2：逐项优化-标题含亮点、每条职责给原文→问题→改写范例（禁止"负责/协助/参与"）、任职要求区分硬性vs加分、薪资福利写具体\n步骤3：输出完整优化稿\n步骤4：配套15道分层面试题（初面5+复试5+终面5，每题标考察点+好回答标准）\n规则：JD≤800字，禁止虚词。'; const u=(t?'岗位：'+t+'\n':'')+(h?'公司亮点：'+h+'\n':'')+'JD原文：\n'+c; const r=await callDeepSeek(s,u); if(r)showResult('jd-result',r,'jd-copy-btn'); else showResult('jd-result','【请复制到任意AI工具处理】\n\n'+s+'\n\n'+u,'jd-copy-btn'); }
+
+// ---- 简历筛选 ----
+async function processScreen() { if(!checkAndUse())return; const jd=document.getElementById('screen-jd').value.trim(); const cv=document.getElementById('screen-resume').value.trim(); if(!jd||!cv){showToast('请填写JD和简历',true);return} showLoading('screen-result'); document.getElementById('screen-copy-btn').style.display='none'; const s='你是资深招聘顾问。请评估候选人匹配度：\n【综合评分】X/10\n【匹配点】列出2-3条\n【不匹配点】列出1-2条\n【风险提示】频繁跳槽/经历断档/职级倒退等\n【面试建议】推荐面试/备选/不推荐，如推荐则给出3个重点追问方向\n规则：每个判断需给出简历中的具体依据。'; const u='岗位JD：\n'+jd+'\n\n候选人简历：\n'+cv; const r=await callDeepSeek(s,u); if(r)showResult('screen-result',r,'screen-copy-btn'); else showResult('screen-result','【请复制到任意AI工具处理】\n\n'+s+'\n\n'+u,'screen-copy-btn'); }
+
+// ---- 面试题库 ----
+async function processQBank() { if(!checkAndUse())return; const p=document.getElementById('qbank-position').value.trim(); const l=document.getElementById('qbank-level').value.trim(); const req=document.getElementById('qbank-requirements').value.trim(); if(!p){showToast('请填写岗位名称',true);return} showLoading('qbank-result'); document.getElementById('qbank-copy-btn').style.display='none'; const s='你是资深招聘专家。请设计分层面试题库：\nA.初面6题（验证真实性，附追问，含3个"说实话测试"题）\nB.复试5题（区分会做和做得好，含情境+变体追问，2个区分度最高题）\nC.终面4题（价值观冲突+工作风格+失败经历+薪资对齐）\nD.面试官指南（每环节用时、评分权重、5个假好回答识别）'; const u='岗位：'+p+'\n级别：'+(l||'未指定')+'\n核心要求：'+(req||'未提供'); const r=await callDeepSeek(s,u); if(r)showResult('qbank-result',r,'qbank-copy-btn'); else showResult('qbank-result','【请复制到任意AI工具处理】\n\n'+s+'\n\n'+u,'qbank-copy-btn'); }
+
+// ---- 面试分析 ----
+async function processAnalysis() { if(!checkAndUse())return; const p=document.getElementById('analysis-position').value.trim(); const c=document.getElementById('analysis-content').value.trim(); if(!c){showToast('请粘贴面试转写文字',true);return} showLoading('analysis-result'); document.getElementById('analysis-copy-btn').style.display='none'; const s='你是资深招聘专家。请分析面试记录：\n一、整体评价（150字内，含是否进下一轮）\n二、逐题回答质量（表格：问题|摘要|评分1-5|评价|数据佐证）\n三、STAR完整度（标注缺失）\n四、隐性信号（主动提及/回避/异常）\n五、一致性问题\n六、二面追问（3方向+问题+目的）\n七、录用风险（适配度/留存/团队匹配，各高/中/低+理由）'; const u=(p?'岗位：'+p+'\n\n':'')+'面试记录：\n'+c; const r=await callDeepSeek(s,u); if(r)showResult('analysis-result',r,'analysis-copy-btn'); else showResult('analysis-result','【请复制到任意AI工具处理】\n\n'+s+'\n\n'+u,'analysis-copy-btn'); }
+
+// ---- 试用期辅导 ----
+async function processProbation() { if(!checkAndUse())return; showLoading('probation-result'); document.getElementById('probation-copy-btn').style.display='none'; let s,u; if(probMode==='plan'){ const pos=document.getElementById('prob-position').value.trim(); const lv=document.getElementById('prob-level').value.trim(); const dur=document.getElementById('prob-duration').value.trim()||'3个月'; const size=document.getElementById('prob-teamsize').value.trim(); const style=document.getElementById('prob-style').value.trim(); if(!pos){showToast('请填写岗位',true);return} s='你是员工关系专家。请制定试用期计划：\n一、每月末应达到的具体目标\n二、三阶段：活下来(1-2周:入职伙伴+每日动作+Check-in)、跑起来(3-8周:小任务+观察信号+绩效对话)、站稳(9-12周:360评估+转正面谈框架含话术+90天计划)\n三、风险预警清单（按周列信号+干预话术）'; u='岗位：'+pos+'\n级别：'+(lv||'未指定')+'\n试用期：'+dur+'\n团队：'+(size||'未提供')+(style?'\n主管风格：'+style:''); } else { const pos=document.getElementById('prob-risk-pos').value.trim(); const time=document.getElementById('prob-risk-time').value.trim(); const obs=document.getElementById('prob-risk-obs').value.trim(); if(!obs){showToast('请填写观察到的表现',true);return} s='你是员工关系专家。请诊断试用期风险：\n一、风险等级：🟢正常/🟡关注/🔴高危\n二、逐条分析（正常vs危险、严重度1-10）\n三、本周3件事（动作+人+时间）\n四、给主管的话术（可直用）\n五、留不住怎么处理'; u='岗位：'+(pos||'未提供')+'\n已入职：'+(time||'未提供')+'\n表现：\n'+obs; } const r=await callDeepSeek(s,u); if(r)showResult('probation-result',r,'probation-copy-btn'); else showResult('probation-result','【请复制到任意AI工具处理】\n\n'+s+'\n\n'+u,'probation-copy-btn'); }
+
+// 清空函数
+function clearJD(){['jd-title','jd-content','jd-highlights'].forEach(i=>document.getElementById(i).value='');document.getElementById('jd-result').classList.remove('show','loading');document.getElementById('jd-result').textContent='';document.getElementById('jd-copy-btn').style.display='none'}
+function clearScreen(){['screen-jd','screen-resume'].forEach(i=>document.getElementById(i).value='');document.getElementById('screen-result').classList.remove('show','loading');document.getElementById('screen-result').textContent='';document.getElementById('screen-copy-btn').style.display='none'}
+function clearQBank(){['qbank-position','qbank-level','qbank-requirements'].forEach(i=>document.getElementById(i).value='');document.getElementById('qbank-result').classList.remove('show','loading');document.getElementById('qbank-result').textContent='';document.getElementById('qbank-copy-btn').style.display='none'}
+function clearAnalysis(){['analysis-position','analysis-content'].forEach(i=>document.getElementById(i).value='');document.getElementById('analysis-result').classList.remove('show','loading');document.getElementById('analysis-result').textContent='';document.getElementById('analysis-copy-btn').style.display='none'}
+function clearProb(){['prob-position','prob-level','prob-duration','prob-teamsize','prob-style','prob-risk-pos','prob-risk-time','prob-risk-obs'].forEach(i=>document.getElementById(i).value='');document.getElementById('probation-result').classList.remove('show','loading');document.getElementById('probation-result').textContent='';document.getElementById('probation-copy-btn').style.display='none'}
+
+// 自动登录
+(function init(){
+    const keys=Object.keys(localStorage).filter(k=>k.startsWith('hrpro_activation_'));
+    for(const key of keys){try{const d=JSON.parse(localStorage.getItem(key));if(d&&d.userName&&d.expiry&&new Date()<=new Date(d.expiry+'T23:59:59')){const uk=key.replace('hrpro_activation_','');const u=JSON.parse(localStorage.getItem('hrpro_usage_'+uk)||'{"uses":0}');if(d.maxUses===0||u.uses<d.maxUses){currentSession={code:'',userName:d.userName,expiry:d.expiry,maxUses:d.maxUses,storageKey:key};document.getElementById('loginScreen').style.display='none';document.getElementById('mainApp').classList.add('show');updateUserBar();break}}}catch(e){}}
+    if(!currentSession)document.getElementById('loginScreen').style.display='flex';
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>激活码生成器 · AI面试辅导</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0a1a0f;color:#e0e0e0;min-height:100vh;display:flex;align-items:center;justify-content:center}
+.card{background:#1a2e1e;border-radius:16px;padding:32px;max-width:560px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+h1{font-size:22px;margin-bottom:4px;color:#fff}
+.sub{font-size:13px;color:#888;margin-bottom:24px}
+label{display:block;font-size:13px;color:#aaa;margin:14px 0 4px}
+input,select{width:100%;padding:10px 14px;border:1px solid #2a3a2a;border-radius:8px;background:#0a1a0f;color:#fff;font-size:14px;font-family:inherit}
+input:focus,select:focus{outline:none;border-color:#07c160}
+.plan-row{display:flex;gap:12px}
+.plan-row>div{flex:1}
+.btn{width:100%;padding:12px;border:none;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;margin-top:20px;transition:.2s}
+.btn-gen{background:linear-gradient(135deg,#07c160,#06ad56);color:#fff}
+.btn-gen:hover{opacity:.9}
+.btn-copy{background:#1a3a2a;color:#5bcc7c;margin-top:8px}
+.btn-copy:hover{background:#1a4a2a}
+.output-section{margin-top:20px;display:none}
+.output-section.show{display:block}
+.code-box{background:#0a1a0f;border:1px solid #2a3a2a;border-radius:10px;padding:20px;text-align:center;margin-top:8px}
+.code{font-size:28px;font-weight:700;color:#07c160;letter-spacing:3px;font-family:'Courier New',monospace;word-break:break-all}
+.code-info{font-size:12px;color:#666;margin-top:8px}
+.history{margin-top:24px;border-top:1px solid #222;padding-top:16px}
+.history h3{font-size:14px;color:#888;margin-bottom:8px}
+.history-item{font-size:12px;color:#666;padding:4px 0;border-bottom:1px solid #1a1a1a;display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px}
+.history-item span{color:#aaa}
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#07c160;color:#fff;padding:10px 24px;border-radius:20px;font-size:14px;z-index:99;opacity:0;transition:.3s;pointer-events:none}
+.toast.show{opacity:1}
+.note{background:#1a2a0a;border:1px solid #2a3a2a;border-radius:8px;padding:12px;margin-top:16px;font-size:12px;color:#aa9;line-height:1.7}
+</style>
+</head>
+<body>
+<div class="card">
+<h1>🔐 激活码生成器</h1>
+<p class="sub">⚠️ 此工具仅你自己使用，不要发给任何人<br>产品：AI面试辅导（候选人版）</p>
+<label>客户称呼</label>
+<input type="text" id="name" placeholder="如：张三 / 李四">
+<div class="plan-row">
+<div><label>套餐类型</label>
+<select id="plan">
+<option value="week">周卡 - 7天</option>
+<option value="month" selected>月卡 - 30天</option>
+<option value="quarter">季卡 - 90天</option>
+<option value="halfyear">半年卡 - 180天</option>
+<option value="year">年卡 - 365天</option>
+<option value="custom">自定义天数</option>
+</select></div>
+<div><label>使用次数上限</label>
+<select id="uses">
+<option value="10">10次</option>
+<option value="30" selected>30次</option>
+<option value="50">50次</option>
+<option value="100">100次</option>
+<option value="200">200次</option>
+<option value="0">不限次数</option>
+</select></div>
+</div>
+<div id="customDaysBox" style="display:none"><label>自定义天数</label><input type="number" id="customDays" value="30" min="1" max="365"></div>
+<button class="btn btn-gen" onclick="generateCode()">🎫 生成激活码</button>
+<div class="output-section" id="output">
+<div class="code-box">
+<div style="font-size:12px;color:#666;margin-bottom:4px">激活码</div>
+<div class="code" id="codeDisplay"></div>
+<div class="code-info" id="codeInfo"></div>
+</div>
+<button class="btn btn-copy" onclick="copyCode()">📋 一键复制激活码</button>
+<button class="btn btn-copy" onclick="copySendMsg()">💬 复制发给客户的话术</button>
+</div>
+<div class="note">
+<strong>📌 使用说明：</strong><br>
+1. 客户付款后，填客户名+选套餐→生成激活码<br>
+2. 把激活码和工作台链接发给客户<br>
+3. 客户打开工作台→输入激活码→使用<br>
+4. 到期或次数用完自动锁定<br>
+5. 本工具离线使用，记录仅存本机
+</div>
+<div class="history" id="history">
+<h3>📋 生成记录（仅存储在本机）</h3>
+<div id="historyList" style="color:#555;font-size:12px">暂无记录</div>
+</div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+const SECRET = "miaoan1913_AI_COACH_2026_KEY";
+const PLAN_DAYS = { week: 7, month: 30, quarter: 90, halfyear: 180, year: 365 };
+
+document.getElementById('plan').addEventListener('change', function() {
+    document.getElementById('customDaysBox').style.display = this.value === 'custom' ? 'block' : 'none';
+});
+
+function encrypt(text, key) {
+    let bytes = '';
+    for (let i = 0; i < text.length; i++) {
+        let c = text.charCodeAt(i) ^ key.charCodeAt(i % key.length);
+        bytes += String.fromCharCode((c >> 8) & 0xFF);
+        bytes += String.fromCharCode(c & 0xFF);
+    }
+    return btoa(bytes).replace(/[+/=]/g, c => ({'+':'.','/':'_','=':''}[c]));
+}
+
+function simpleHash(str) {
+    let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+    for (let i = 0; i < str.length; i++) {
+        let ch = str.charCodeAt(i);
+        h1 = Math.imul(h1 ^ ch, 2654435761);
+        h2 = Math.imul(h2 ^ ch, 1597334677);
+    }
+    h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507);
+    h2 = Math.imul(h2 ^ (h2 >>> 16), 3266489909);
+    return (h1 ^ h2) >>> 0;
+}
+
+function generateCode() {
+    const name = document.getElementById('name').value.trim();
+    if (!name) { showToast('请填写客户称呼'); return; }
+    const plan = document.getElementById('plan').value;
+    let days = plan === 'custom' ? parseInt(document.getElementById('customDays').value) || 30 : PLAN_DAYS[plan];
+    const uses = parseInt(document.getElementById('uses').value);
+    const now = new Date();
+    const expiryDate = new Date(now.getTime() + days * 86400000);
+    const expiryStr = expiryDate.toISOString().slice(0, 10);
+    const randomId = Math.random().toString(36).substring(2, 6).toUpperCase();
+    const payload = expiryStr + '|' + uses + '|' + name + '|' + randomId;
+    const encrypted = encrypt(payload, SECRET);
+    const hash = simpleHash(encrypted + SECRET).toString(16).slice(0, 4).toUpperCase();
+    const fullCode = encrypted + hash;
+    const formatted = fullCode.match(/.{1,4}/g).join('-');
+    document.getElementById('codeDisplay').textContent = formatted;
+    document.getElementById('codeInfo').textContent = '到期日：'+expiryStr+' · 可用次数：'+(uses===0?'不限':uses+'次')+' · 客户：'+name;
+    document.getElementById('output').classList.add('show');
+    saveHistory(name, formatted, expiryStr, uses);
+    showToast('✅ 激活码已生成！');
+}
+
+function copyCode() {
+    const code = document.getElementById('codeDisplay').textContent;
+    if (!code) return;
+    navigator.clipboard.writeText(code).then(() => showToast('✅ 已复制！发给客户即可'));
+}
+
+function copySendMsg() {
+    const code = document.getElementById('codeDisplay').textContent;
+    const info = document.getElementById('codeInfo').textContent;
+    if (!code) return;
+    const msg = '您好，您的「AI面试辅导」已开通！\n\n🔑 激活码：'+code+'\n📅 '+info+'\n\n使用步骤：\n1. 打开工作台链接\n2. 输入激活码\n3. 使用简历优化和模拟面试\n\n💬 客服微信：miaoan1913';
+    navigator.clipboard.writeText(msg).then(() => showToast('✅ 话术已复制！粘贴发给客户'));
+}
+
+function saveHistory(name, code, expiry, uses) {
+    let history = JSON.parse(localStorage.getItem('coach_history') || '[]');
+    history.unshift({ name, code, expiry, uses, time: new Date().toLocaleString() });
+    if (history.length > 50) history = history.slice(0, 50);
+    localStorage.setItem('coach_history', JSON.stringify(history));
+    renderHistory();
+}
+
+function renderHistory() {
+    let history = JSON.parse(localStorage.getItem('coach_history') || '[]');
+    if (history.length === 0) { document.getElementById('historyList').innerHTML = '暂无记录'; return; }
+    document.getElementById('historyList').innerHTML = history.map(h =>
+        '<div class="history-item"><span>'+h.name+'</span> <span style="color:#07c160">'+h.code+'</span> <span>到期'+h.expiry+' · '+(h.uses===0?'不限':h.uses+'次')+'</span><span style="color:#555">'+h.time+'</span></div>'
+    ).join('');
+}
+
+function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 1800);
+}
+
+renderHistory();
+</script>
+</body>
+</html>

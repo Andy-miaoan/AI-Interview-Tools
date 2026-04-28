@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>AI面试辅导 · 候选人智能工作台</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f0f5f2;color:#333}
+.login-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:linear-gradient(135deg,#0a1a0f,#0d2d15,#0a1a0f);z-index:999;display:flex;align-items:center;justify-content:center;flex-direction:column}
+.login-card{background:#fff;border-radius:20px;padding:40px 30px;max-width:420px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.login-card .icon{font-size:48px;margin-bottom:12px}
+.login-card h2{font-size:20px;margin-bottom:4px;color:#0d2d15}
+.login-card .subt{font-size:13px;color:#999;margin-bottom:24px}
+.login-card input{width:100%;padding:12px 16px;border:2px solid #e0e0e0;border-radius:10px;font-size:18px;text-align:center;letter-spacing:3px;font-family:'Courier New',monospace;text-transform:uppercase}
+.login-card input:focus{outline:none;border-color:#07c160}
+.login-card .btn{width:100%;padding:12px;border:none;border-radius:10px;font-size:16px;font-weight:600;cursor:pointer;margin-top:12px;transition:.2s}
+.login-card .btn-activate{background:linear-gradient(135deg,#07c160,#06ad56);color:#fff}
+.login-card .btn-activate:hover{opacity:.9}
+.login-card .btn-activate:disabled{opacity:.5;cursor:not-allowed}
+.login-err{color:#e74c3c;font-size:12px;margin-top:6px;min-height:18px}
+.login-info{font-size:11px;color:#aaa;margin-top:16px;line-height:1.6}
+.wechat-bind-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.6);z-index:1000;display:none;align-items:center;justify-content:center}
+.wechat-bind-overlay.show{display:flex}
+.wechat-bind-card{background:#fff;border-radius:16px;padding:28px 24px;max-width:380px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.3);animation:slideUp .3s ease}
+@keyframes slideUp{from{transform:translateY(30px);opacity:0}to{transform:translateY(0);opacity:1}}
+.wechat-bind-card .icon{font-size:40px;margin-bottom:8px}
+.wechat-bind-card h3{font-size:18px;margin-bottom:4px}
+.wechat-bind-card .subt{font-size:12px;color:#999;margin-bottom:16px;line-height:1.6}
+.wechat-bind-card .benefits{text-align:left;font-size:12px;color:#666;margin-bottom:14px;line-height:1.8}
+.wechat-bind-card .benefits span{color:#07c160}
+.wechat-bind-card input{width:100%;padding:10px 14px;border:2px solid #e0e0e0;border-radius:10px;font-size:15px;text-align:center}
+.wechat-bind-card input:focus{outline:none;border-color:#07c160}
+.wechat-bind-card .btn{width:100%;padding:11px;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;margin-top:10px;transition:.2s}
+.wechat-bind-card .btn-save{background:linear-gradient(135deg,#07c160,#06ad56);color:#fff}
+.wechat-bind-card .btn-save:hover{opacity:.9}
+.wechat-bind-card .btn-skip{background:none;color:#aaa;font-size:13px;font-weight:400;margin-top:6px}
+.app{max-width:860px;margin:0 auto;min-height:100vh;display:none}
+.app.show{display:block}
+.header{background:linear-gradient(135deg,#0d2d15,#1a4a2a);color:#fff;padding:16px 20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+.header h1{font-size:18px}
+.header .user-bar{font-size:11px;opacity:.9;text-align:right;line-height:1.5}
+.user-bar .remaining{color:#5bcc7c;font-weight:600}
+.contact-bar{background:#fffbe6;border-bottom:1px solid #ffe082;padding:8px 16px;text-align:center;font-size:12px;color:#8d6e00;display:none}
+.contact-bar.show{display:block}
+.contact-bar .wx-btn{display:inline-block;background:#07c160;color:#fff;padding:4px 12px;border-radius:10px;font-size:11px;margin-left:6px;cursor:pointer;font-weight:600}
+.tabs{display:flex;background:#fff;overflow-x:auto;position:sticky;top:0;z-index:10;border-bottom:1px solid #e8e8e8;-webkit-overflow-scrolling:touch}
+.tab{flex:1;min-width:100px;padding:14px 10px;text-align:center;font-size:13px;cursor:pointer;border:none;background:none;color:#888;border-bottom:2px solid transparent;transition:.2s;white-space:nowrap}
+.tab:hover{color:#333;background:#fafafa}
+.tab.active{color:#0d2d15;border-bottom-color:#07c160;font-weight:600}
+.main{padding:16px}
+.panel{display:none}
+.panel.active{display:block}
+.card{background:#fff;border-radius:14px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.06);margin-bottom:12px}
+.card h3{font-size:16px;margin-bottom:2px}
+.card .desc{font-size:12px;color:#999;margin-bottom:16px}
+label{display:block;font-size:13px;font-weight:600;color:#555;margin:12px 0 4px}
+textarea,input[type="text"]{width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;line-height:1.6;font-family:inherit;resize:vertical}
+textarea:focus,input:focus{outline:none;border-color:#07c160;box-shadow:0 0 0 3px rgba(7,193,96,.08)}
+.btn-row{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+.btn{padding:10px 20px;border:none;border-radius:8px;font-size:14px;cursor:pointer;font-weight:600;transition:.2s;white-space:nowrap}
+.btn-primary{background:#07c160;color:#fff}
+.btn-primary:hover{background:#06ad56}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed}
+.btn-secondary{background:#f0f0f0;color:#555}
+.btn-secondary:hover{background:#e4e4e4}
+.btn-outline{background:#fff;color:#07c160;border:1px solid #07c160}
+.result-box{display:none;margin-top:14px;padding:16px;background:#fafbfc;border:1px solid #e0e0e0;border-radius:10px;font-size:13px;line-height:1.8;white-space:pre-wrap;max-height:500px;overflow-y:auto}
+.result-box.show{display:block}
+.result-box.loading{color:#999;text-align:center;padding:30px}
+.spinner{display:inline-block;width:20px;height:20px;border:2px solid #ddd;border-top-color:#07c160;border-radius:50%;animation:spin .8s linear infinite;vertical-align:middle;margin-right:8px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:10px 22px;border-radius:20px;font-size:13px;z-index:999;opacity:0;transition:.3s;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1}
+.toast.warn{background:#e74c3c}
+.wechat-footer{background:#f8f9fa;border-top:1px solid #eee;padding:8px 16px;text-align:center;font-size:11px;color:#999}
+.wechat-footer .wx-badge{display:inline-flex;align-items:center;gap:4px;background:#07c160;color:#fff;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600;cursor:pointer;transition:.2s}
+.wechat-footer .wx-badge:hover{opacity:.85}
+.instruction{background:#e8f5e9;padding:10px 14px;border-radius:8px;font-size:12px;color:#2e7d32;margin-top:10px;line-height:1.7}
+.instruction strong{color:#1b5e20}
+@media(max-width:480px){
+    .header h1{font-size:15px}
+    .tab{padding:10px 8px;font-size:11px}
+    .card{padding:16px}
+}
+</style>
+</head>
+<body>
+
+<!-- 激活码登录 -->
+<div class="login-overlay" id="loginScreen">
+    <div class="login-card">
+        <div class="icon">🎯</div>
+        <h2>AI面试辅导</h2>
+        <div class="subt">简历优化 · 模拟面试<br>输入激活码开始使用</div>
+        <input type="text" id="activationInput" placeholder="请输入激活码（复制完整激活码到这里）" maxlength="200" autocomplete="off">
+        <div class="login-err" id="loginErr"></div>
+        <button class="btn btn-activate" id="activateBtn" onclick="activate()">🚀 激活使用</button>
+        <div class="login-info">还没有激活码？<br>💬 加微信：miaoan1913 获取</div>
+    </div>
+</div>
+
+<!-- 微信绑定 -->
+<div class="wechat-bind-overlay" id="wechatBindOverlay">
+    <div class="wechat-bind-card">
+        <div class="icon">📱</div>
+        <h3>绑定微信，不怕到期</h3>
+        <div class="subt">到期前3天微信自动提醒续费<br>避免正在用突然中断</div>
+        <div class="benefits"><span>✅</span> 到期前3天微信提醒续费<br><span>✅</span> 换设备时一键恢复会员<br><span>✅</span> 新功能上线第一时间通知<br><span>🚫</span> 不打扰、不群发、不营销</div>
+        <input type="text" id="wechatInput" placeholder="输入微信号（选填）">
+        <button class="btn btn-save" onclick="saveWechat()">💚 绑定，开始使用</button>
+        <button class="btn btn-skip" onclick="skipWechat()">先跳过，直接使用</button>
+    </div>
+</div>
+
+<!-- 主界面 -->
+<div class="app" id="mainApp">
+    <div class="header">
+        <div><h1>🎯 AI面试辅导</h1></div>
+        <div class="user-bar">
+            <div id="userName"></div>
+            <div>剩余：<span class="remaining" id="remainingUses">-</span> 次 · 到期：<span id="expiryDate">-</span></div>
+            <div id="wechatBound" style="display:none;margin-top:2px"><span style="color:#07c160">💚</span> 已绑定：<span id="boundWechat"></span></div>
+        </div>
+    </div>
+    <div class="contact-bar" id="contactBar">
+        ⚠️ <span id="contactBarMsg">即将到期</span>
+        <span class="wx-btn" onclick="copyWechat()">📋 一键复制客服微信</span>
+    </div>
+    <div class="tabs">
+        <button class="tab active" onclick="switchTab('resume')">📝 简历优化</button>
+        <button class="tab" onclick="switchTab('mock')">🎤 模拟面试</button>
+    </div>
+    <div class="main">
+    <!-- 简历优化 -->
+    <div class="panel active" id="panel-resume">
+        <div class="card">
+            <h3>📝 简历智能优化</h3>
+            <div class="desc">粘贴简历 → AI逐项分析 → 输出可直接用的改写版本</div>
+            <label>目标岗位（选填）</label>
+            <input type="text" id="resume-target" placeholder="如：电商运营经理">
+            <label>简历内容</label>
+            <textarea id="resume-content" rows="10" placeholder="在此粘贴简历全文..."></textarea>
+            <div class="btn-row">
+                <button class="btn btn-primary" onclick="processResume()">🔧 AI优化简历</button>
+                <button class="btn btn-secondary" onclick="clearResume()">清空</button>
+            </div>
+            <div class="result-box" id="resume-result"></div>
+            <button class="btn btn-outline" id="resume-copy-btn" style="display:none;margin-top:8px" onclick="copyResult('resume-result')">📋 复制结果</button>
+            <div class="instruction">💡 AI会按5步诊断：整体印象→结构问题→逐段改写→格式检查→匹配度分析，每个建议都有改写范例</div>
+        </div>
+    </div>
+    <!-- 模拟面试 -->
+    <div class="panel" id="panel-mock">
+        <div class="card">
+            <h3>🎤 AI模拟面试</h3>
+            <div class="desc">AI扮演面试官 → 按岗位出题 → 逐题反馈 → 输出评估报告</div>
+            <label>目标岗位</label>
+            <input type="text" id="mock-position" placeholder="如：产品经理">
+            <label>级别</label>
+            <input type="text" id="mock-level" placeholder="初级 / 中级 / 高级 / 管理岗">
+            <label>最担心的环节（选填）</label>
+            <input type="text" id="mock-worry" placeholder="如：行为面试 / 薪资谈判">
+            <div class="btn-row">
+                <button class="btn btn-primary" onclick="processMock()">🎤 开始模拟面试</button>
+                <button class="btn btn-secondary" onclick="clearMock()">清空</button>
+            </div>
+            <div class="result-box" id="mock-result"></div>
+            <button class="btn btn-outline" id="mock-copy-btn" style="display:none;margin-top:8px" onclick="copyResult('mock-result')">📋 复制结果</button>
+            <div class="instruction">💡 复制指令到任意AI工具（Kimi/DeepSeek/通义千问均可），AI以面试官身份逐题提问并评分</div>
+        </div>
+    </div>
+    </div>
+    <div class="wechat-footer">
+        💬 客服微信：<span style="color:#07c160;font-weight:600">miaoan1913</span>
+        <span class="wx-badge" onclick="copyWechat()">📋 复制微信号</span>
+    </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const SECRET = "miaoan1913_AI_COACH_2026_KEY";
+const DEEPSEEK_API_KEY = '';
+const DEEPSEEK_API_URL = 'https://api.deepseek.com/v1/chat/completions';
+
+function decrypt(encoded, key) {
+    try {
+        encoded = encoded.replace(/[\._]/g, c => ({'.':'+','_':'/'}[c]));
+        while (encoded.length % 4) encoded += '=';
+        let bytes = atob(encoded);
+        let result = '';
+        for (let i = 0; i < bytes.length; i += 2) {
+            let hi = bytes.charCodeAt(i) & 0xFF;
+            let lo = bytes.charCodeAt(i + 1) & 0xFF;
+            let c = (hi << 8) | lo;
+            result += String.fromCharCode(c ^ key.charCodeAt((i / 2) % key.length));
+        }
+        return result;
+    } catch(e) { return ''; }
+}
+
+function simpleHash(str) {
+    let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+    for (let i = 0; i < str.length; i++) {
+        let ch = str.charCodeAt(i);
+        h1 = Math.imul(h1 ^ ch, 2654435761);
+        h2 = Math.imul(h2 ^ ch, 1597334677);
+    }
+    h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507);
+    h2 = Math.imul(h2 ^ (h2 >>> 16), 3266489909);
+    return (h1 ^ h2) >>> 0;
+}
+
+function validateCode(rawCode) {
+    const clean = rawCode.replace(/[-\s]/g, '');
+    if (clean.length < 12) return { valid: false, error: '激活码格式错误' };
+    const hashPart = clean.slice(-4).toUpperCase();
+    const dataPart = clean.slice(0, -4);
+    const expectedHash = simpleHash(dataPart + SECRET).toString(16).slice(0, 4).toUpperCase();
+    if (hashPart !== expectedHash) return { valid: false, error: '激活码无效' };
+    const payload = decrypt(dataPart, SECRET);
+    if (!payload) return { valid: false, error: '激活码数据损坏' };
+    const parts = payload.split('|');
+    if (parts.length < 4) return { valid: false, error: '激活码数据损坏' };
+    const expiryStr = parts[0];
+    const maxUses = parseInt(parts[1]);
+    const userName = parts[2];
+    const expiry = new Date(expiryStr + 'T23:59:59');
+    if (new Date() > expiry) return { valid: false, error: '激活码已于 '+expiryStr+' 过期' };
+    return { valid: true, userName, expiry: expiryStr, maxUses, expiryDate: expiry };
+}
+
+function getUsageKey(code) { return 'coach_usage_' + simpleHash(code.replace(/[-\s]/g, '').toUpperCase()).toString(16); }
+function getUsage(code) { return JSON.parse(localStorage.getItem(getUsageKey(code)) || '{"uses":0,"firstUse":null}'); }
+function incrementUsage(code) {
+    const key = getUsageKey(code);
+    const data = getUsage(code);
+    data.uses++;
+    if (!data.firstUse) data.firstUse = new Date().toISOString().slice(0, 10);
+    localStorage.setItem(key, JSON.stringify(data));
+    return data;
+}
+
+let currentSession = null;
+
+function activate() {
+    const input = document.getElementById('activationInput').value.trim();
+    const errEl = document.getElementById('loginErr');
+    const btn = document.getElementById('activateBtn');
+    if (!input) { errEl.textContent = '请输入激活码'; return; }
+    const storageKey = 'coach_activation_' + simpleHash(input.replace(/[-\s]/g, '').toUpperCase()).toString(16);
+    const cached = localStorage.getItem(storageKey);
+    let validation;
+    if (cached) {
+        validation = JSON.parse(cached);
+        if (new Date() > new Date(validation.expiry + 'T23:59:59')) {
+            localStorage.removeItem(storageKey);
+            errEl.textContent = '激活码已过期，请续费';
+            return;
+        }
+    } else {
+        validation = validateCode(input);
+        if (!validation.valid) { errEl.textContent = validation.error; return; }
+        localStorage.setItem(storageKey, JSON.stringify(validation));
+    }
+    const usage = getUsage(input);
+    if (validation.maxUses > 0 && usage.uses >= validation.maxUses) {
+        errEl.textContent = '使用次数已用完，请联系续费';
+        return;
+    }
+    currentSession = { code: input, userName: validation.userName, expiry: validation.expiry, maxUses: validation.maxUses, storageKey };
+    const boundWx = localStorage.getItem('coach_bound_wechat');
+    if (boundWx) {
+        btn.disabled = true;
+        btn.textContent = '✅ 激活成功！欢迎回来';
+        setTimeout(() => { document.getElementById('loginScreen').style.display = 'none'; document.getElementById('mainApp').classList.add('show'); updateUserBar(); }, 400);
+    } else {
+        btn.disabled = true;
+        btn.textContent = '✅ 激活成功！';
+        setTimeout(() => { document.getElementById('wechatBindOverlay').classList.add('show'); }, 300);
+    }
+}
+
+function saveWechat() {
+    const wx = document.getElementById('wechatInput').value.trim();
+    if (wx) { localStorage.setItem('coach_bound_wechat', wx); showToast('✅ 微信已绑定！到期前3天自动提醒'); }
+    enterApp();
+}
+function skipWechat() { showToast('💡 可随时在底部点击"复制微信号"添加客服'); enterApp(); }
+function enterApp() {
+    document.getElementById('wechatBindOverlay').classList.remove('show');
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('mainApp').classList.add('show');
+    updateUserBar();
+}
+function copyWechat() {
+    navigator.clipboard.writeText('miaoan1913').then(() => showToast('✅ 已复制客服微信：miaoan1913，去微信添加好友即可'))
+        .catch(() => showToast('📋 客服微信：miaoan1913（请手动搜索添加）'));
+}
+
+function updateUserBar() {
+    if (!currentSession) return;
+    const usage = getUsage(currentSession.code);
+    const remaining = currentSession.maxUses === 0 ? '不限' : Math.max(0, currentSession.maxUses - usage.uses);
+    document.getElementById('userName').textContent = '👤 ' + currentSession.userName;
+    document.getElementById('remainingUses').textContent = remaining;
+    document.getElementById('expiryDate').textContent = currentSession.expiry;
+    const boundWx = localStorage.getItem('coach_bound_wechat');
+    if (boundWx) { document.getElementById('wechatBound').style.display = 'block'; document.getElementById('boundWechat').textContent = boundWx; }
+    const daysLeft = Math.ceil((new Date(currentSession.expiry + 'T23:59:59') - new Date()) / 86400000);
+    const contactBar = document.getElementById('contactBar');
+    const contactBarMsg = document.getElementById('contactBarMsg');
+    if (daysLeft <= 7 && daysLeft > 0) { contactBar.classList.add('show'); contactBarMsg.textContent = '还有 '+daysLeft+' 天到期'; }
+    else if (daysLeft <= 0) { contactBar.classList.add('show'); contactBarMsg.textContent = '已到期，续费后恢复'; }
+    else if (currentSession.maxUses > 0 && remaining <= 5 && remaining > 0) { contactBar.classList.add('show'); contactBarMsg.textContent = '仅剩 '+remaining+' 次使用'; }
+    else { contactBar.classList.remove('show'); }
+    if (daysLeft <= 7) document.getElementById('expiryDate').style.color = '#ff6b6b';
+}
+
+function checkAndUse() {
+    if (!currentSession) { document.getElementById('loginScreen').style.display = 'flex'; document.getElementById('mainApp').classList.remove('show'); return false; }
+    if (new Date() > new Date(currentSession.expiry + 'T23:59:59')) { document.getElementById('loginErr').textContent = '已到期，请加微信 miaoan1913 续费'; logout(); return false; }
+    const usage = getUsage(currentSession.code);
+    if (currentSession.maxUses > 0 && usage.uses >= currentSession.maxUses) { showToast('次数已用完，请加微信 miaoan1913 续费', true); updateUserBar(); return false; }
+    incrementUsage(currentSession.code);
+    updateUserBar();
+    return true;
+}
+
+function logout() {
+    currentSession = null;
+    document.getElementById('loginScreen').style.display = 'flex';
+    document.getElementById('mainApp').classList.remove('show');
+    document.getElementById('activationInput').value = '';
+    document.getElementById('loginErr').textContent = '';
+    document.getElementById('activateBtn').disabled = false;
+    document.getElementById('activateBtn').textContent = '🚀 激活使用';
+    document.getElementById('contactBar').classList.remove('show');
+}
+
+function switchTab(name) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelector('.tab[onclick*="'+name+'"]').classList.add('active');
+    document.getElementById('panel-'+name).classList.add('active');
+}
+
+function showToast(msg, warn) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast ' + (warn ? 'warn' : '');
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+function copyResult(id) { navigator.clipboard.writeText(document.getElementById(id).textContent).then(() => showToast('✅ 已复制！')); }
+function showResult(id, text, btnId) {
+    const box = document.getElementById(id); box.textContent = text; box.classList.remove('loading'); box.classList.add('show');
+    if (btnId) document.getElementById(btnId).style.display = 'inline-block';
+    box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+function showLoading(id) {
+    const box = document.getElementById(id);
+    box.innerHTML = '<span class="spinner"></span> AI正在处理中，请稍候...';
+    box.classList.add('show', 'loading');
+    box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+async function callDeepSeek(systemPrompt, userContent) {
+    if (!DEEPSEEK_API_KEY) return null;
+    try {
+        const resp = await fetch(DEEPSEEK_API_URL, {
+            method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + DEEPSEEK_API_KEY },
+            body: JSON.stringify({ model: 'deepseek-chat', messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: userContent }], temperature: 0.7, max_tokens: 3000 })
+        });
+        if (!resp.ok) return null;
+        return (await resp.json()).choices?.[0]?.message?.content || null;
+    } catch(e) { return null; }
+}
+
+// ---- 简历优化 ----
+async function processResume() {
+    if (!checkAndUse()) return;
+    const target = document.getElementById('resume-target').value.trim();
+    const content = document.getElementById('resume-content').value.trim();
+    if (!content) { showToast('请先粘贴简历内容', true); return; }
+    showLoading('resume-result');
+    document.getElementById('resume-copy-btn').style.display = 'none';
+    const system = '你是一位有8年招聘经验的资深HR。请严格按以下5步输出：\n第1步：整体印象（2句话）\n第2步：结构问题（检查个人总结、时间排序、动作+数据+结果三要素、教育技能位置）\n第3步：逐段内容优化（每段给：原文→问题→改写范例。消灭"负责/参与/协助"等模糊词）\n第4步：格式问题\n第5步：'+(target?'对照目标岗位逐条匹配度分析':'询问目标岗位后给针对性建议')+'\n重要：每个建议必须给"原文→问题→改写范例"，语气像朋友帮忙。';
+    const apiResult = await callDeepSeek(system, (target?'目标岗位：'+target+'\n\n':'')+'简历内容：\n'+content);
+    if (apiResult) { showResult('resume-result', apiResult, 'resume-copy-btn'); }
+    else { showResult('resume-result', '【请将以下内容复制到任意AI工具中处理】\n\n'+system+'\n\n'+(target?'目标岗位：'+target+'\n\n':'')+'简历内容：\n'+content, 'resume-copy-btn'); }
+}
+
+// ---- 模拟面试 ----
+async function processMock() {
+    if (!checkAndUse()) return;
+    const pos = document.getElementById('mock-position').value.trim();
+    const lv = document.getElementById('mock-level').value.trim();
+    const worry = document.getElementById('mock-worry').value.trim();
+    if (!pos) { showToast('请填写目标岗位', true); return; }
+    showLoading('mock-result');
+    document.getElementById('mock-copy-btn').style.display = 'none';
+    const system = '你是一位经验丰富的面试官。请进行模拟面试：\n第1步：确认岗位('+pos+')、级别('+(lv||'未指定')+')、担心环节('+(worry||'未指定')+')后开始\n第2步：5-7个核心问题，分3轮递进（基础→进阶→杀招），每次只问1题，听完回答给评价再追问\n第3步：面试结束输出评估报告：综合评分/10、最佳回答、最弱回答+改进方案含话术范例、致命短板、薪资谈判建议\n第4步：针对弱项出3个补强练习题';
+    const userMsg = '我要面试'+pos+'岗位（'+(lv||'未指定级别')+'）'+(worry?'，最担心'+worry:'')+'。请开始模拟面试。';
+    const apiResult = await callDeepSeek(system, userMsg);
+    if (apiResult) { showResult('mock-result', apiResult, 'mock-copy-btn'); }
+    else { showResult('mock-result', '【请将以下内容复制到任意AI工具中开始模拟面试】\n\n'+system+'\n\n'+userMsg, 'mock-copy-btn'); }
+}
+
+function clearResume() { ['resume-target','resume-content'].forEach(id=>document.getElementById(id).value=''); document.getElementById('resume-result').classList.remove('show','loading'); document.getElementById('resume-result').textContent=''; document.getElementById('resume-copy-btn').style.display='none'; }
+function clearMock() { ['mock-position','mock-level','mock-worry'].forEach(id=>document.getElementById(id).value=''); document.getElementById('mock-result').classList.remove('show','loading'); document.getElementById('mock-result').textContent=''; document.getElementById('mock-copy-btn').style.display='none'; }
+
+// 自动登录检查
+(function init() {
+    const keys = Object.keys(localStorage).filter(k => k.startsWith('coach_activation_'));
+    for (const key of keys) {
+        try {
+            const data = JSON.parse(localStorage.getItem(key));
+            if (data && data.userName && data.expiry && new Date() <= new Date(data.expiry + 'T23:59:59')) {
+                const uk = key.replace('coach_activation_', '');
+                const usage = JSON.parse(localStorage.getItem('coach_usage_'+uk) || '{"uses":0}');
+                if (data.maxUses === 0 || usage.uses < data.maxUses) {
+                    currentSession = { code: '', userName: data.userName, expiry: data.expiry, maxUses: data.maxUses, storageKey: key };
+                    document.getElementById('loginScreen').style.display = 'none';
+                    document.getElementById('mainApp').classList.add('show');
+                    updateUserBar();
+                    break;
+                }
+            }
+        } catch(e) {}
+    }
+    if (!currentSession) document.getElementById('loginScreen').style.display = 'flex';
+})();
+</script>
+</body>
+</html>

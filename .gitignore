@@ -1,0 +1,22 @@
+# System files
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Test files
+test_*.html
+*_debug.html
+
+# Claude local settings
+.claude/
+
+# Editor files
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+
+# Temp files
+*.tmp
+*.temp
