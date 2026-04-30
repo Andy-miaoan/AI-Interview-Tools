@@ -727,6 +727,8 @@ async function generateCode() {
     (useCloud ? '' : ' · ⚠️ 离线码（无跨设备追踪）');
 
   document.getElementById('output').style.display = 'block';
+  document.getElementById('output').dataset.expiry = expiryStr;
+  document.getElementById('output').dataset.uses = uses;
   saveSale(name, formatted, expiryStr, uses, plan, distId, blobId);
   genBtn.disabled = false; genBtn.textContent = '🎫 生成激活码';
   showToast(useCloud ? '✅ 激活码已生成！' : '⚠️ 已生成离线码（jsonblob不可用，无跨设备追踪）');
@@ -740,36 +742,46 @@ function copyCode() {
 
 function copySendMsg() {
   const code = document.getElementById('codeDisplay').textContent;
-  const info = document.getElementById('codeInfo').textContent;
   if (!code) return;
+  const output = document.getElementById('output');
+  const expiry = output.dataset.expiry || '';
+  const uses = parseInt(output.dataset.uses) || 0;
+  const custName = document.getElementById('custName').value.trim() || '客户';
   const meta = PRODUCT_META[currentProduct];
   const urls = {
     coach: 'https://andy-miaoan.github.io/AI-Interview-Tools/AI面试辅导/工具_AI面试辅导工作台.html',
     hr: 'https://andy-miaoan.github.io/AI-Interview-Tools/企业AI面试官/工具_企业AI面试官工作台.html'
   };
   const features = {
-    coach: '简历优化 · 简历生成 · 模拟面试 · 谈薪指导 · 试用期护航',
-    hr: 'JD优化 · 简历筛选 · 面试题库 · 面试分析 · 谈薪策略 · 试用期管理'
+    coach: '📝 简历优化 — 诊断结构/逐段改写/匹配度分析\n📄 简历生成 — STAR法则/数据化表达/可直接投递\n🎤 模拟面试 — 逐题追问/即时点评/评估报告\n💰 谈薪指导 — 三套方案/每轮话术/陷阱应对\n🛡️ 试用期护航 — 三阶段计划/风险预警/汇报话术',
+    hr: '📋 JD优化 — 诊断问题/逐项改写/配套面试题\n🔎 简历筛选 — 匹配度评分/风险标注/面试建议\n📚 面试题库 — 分层出题/追问设计/评分标准\n🔍 面试分析 — 逐题评估/STAR完整度/录用风险\n💵 谈薪策略 — HR视角三轮谈判/心理分析/促成话术\n🛡️ 试用期管理 — 落地计划/风险诊断/主管话术'
   };
-  const msg = `🎉 您的「${meta.name}」已开通！
+  const plan = document.getElementById('plan').value;
+  const planLabel = {trial:'体验卡',week:'周卡',month:'月卡',quarter:'季卡',halfyear:'半年卡',year:'年卡',custom:'自定义'}[plan]||plan;
+  const msg = `${custName}您好，您的「${meta.name}」已开通 🎉
 
-━━━━━━━━━━━━━━━━━
+📌 工作台：${urls[currentProduct]}
 🔑 激活码：${code}
-📅 ${info}
-━━━━━━━━━━━━━━━━━
 
-📌 使用步骤：
-① 点击下方链接打开工作台
-② 输入上方激活码
-③ 输入微信号完成激活，即可使用
+━━ ${planLabel} · 到期 ${expiry} · ${uses===0?'不限次数':uses+'次'} ━━
 
-👉 工作台入口：
-${urls[currentProduct]}
+━━ 使用方法（1分钟上手）━━
+打开链接 → 输入激活码 → 输入微信号 → 选功能 → 填信息 → AI生成结果 → 一键复制
 
-🛠 可用功能：
+💡 没有API Key也能用：
+把指令复制到 DeepSeek（chat.deepseek.com）或 Kimi（kimi.moonshot.cn）粘贴即可
+
+━━ ${currentProduct==='coach'?'五大':'六大'}功能模块 ━━
 ${features[currentProduct]}
 
-💬 如有问题，请联系客服微信：miaoan1913
+━━ 套餐参考 ━━
+${
+  currentProduct==='coach'
+  ? '月卡 ¥19（30次）· 季卡 ¥99（100次）· 年卡 ¥299（500次）'
+  : '月卡 ¥99（30次）· 季卡 ¥199（100次）· 年卡 ¥499（500次）'
+}
+
+💬 任何问题随时联系：miaoan1913
 
 —— 安迪 AI调度师`;
   navigator.clipboard.writeText(msg).then(() => showToast('✅ 话术已复制！'));
