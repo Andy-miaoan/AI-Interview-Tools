@@ -748,21 +748,30 @@ function copySendMsg() {
     hr: 'https://andy-miaoan.github.io/AI-Interview-Tools/企业AI面试官/工具_企业AI面试官工作台.html'
   };
   const features = {
-    coach: '简历优化、简历生成、模拟面试、谈薪指导、试用期护航',
-    hr: 'JD优化、简历筛选、面试题库、面试分析、谈薪策略、试用期管理'
+    coach: '简历优化 · 简历生成 · 模拟面试 · 谈薪指导 · 试用期护航',
+    hr: 'JD优化 · 简历筛选 · 面试题库 · 面试分析 · 谈薪策略 · 试用期管理'
   };
-  const msg = `您好，您的「${meta.name}」已开通！
+  const msg = `🎉 您的「${meta.name}」已开通！
 
+━━━━━━━━━━━━━━━━━
 🔑 激活码：${code}
 📅 ${info}
+━━━━━━━━━━━━━━━━━
 
-使用步骤：
-1. 打开工作台链接
-2. 输入激活码
-3. 使用${features[currentProduct]}
+📌 使用步骤：
+① 点击下方链接打开工作台
+② 输入上方激活码
+③ 输入微信号完成激活，即可使用
 
-工作台：${urls[currentProduct]}
-客服微信：miaoan1913`;
+👉 工作台入口：
+${urls[currentProduct]}
+
+🛠 可用功能：
+${features[currentProduct]}
+
+💬 如有问题，请联系客服微信：miaoan1913
+
+—— 安迪 AI调度师`;
   navigator.clipboard.writeText(msg).then(() => showToast('✅ 话术已复制！'));
 }
 
