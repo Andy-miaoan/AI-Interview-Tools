@@ -1,0 +1,1281 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>激活码 & 分销管理 · 安迪 AI调度师</title>
+<link rel="icon" href="logo.png" type="image/png">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC',sans-serif;
+  background:linear-gradient(180deg, #06060e 0%, #0c0c18 100%);
+  color:#e0e0e0;
+  min-height:100vh;
+  line-height:1.6;
+}
+
+/* ===== HEADER ===== */
+header{
+  background:rgba(10,10,22,.97);
+  border-bottom:1px solid rgba(255,255,255,.04);
+  padding:20px 40px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:32px;
+  position:sticky;
+  top:0;
+  z-index:10;
+  backdrop-filter:blur(12px);
+  flex-wrap:wrap;
+}
+.brand-row{display:flex;align-items:center;gap:14px}
+.logo-img{width:42px;height:42px;border-radius:10px;object-fit:cover}
+.brand-name{font-size:17px;font-weight:700;color:#e8e8e8}
+.brand-sub{font-size:11px;color:rgba(255,255,255,.28);margin-top:2px}
+.product-switch{
+  display:flex;gap:4px;
+  background:rgba(255,255,255,.025);
+  border-radius:14px;padding:5px;
+  border:1px solid rgba(255,255,255,.04);
+}
+.product-btn{
+  padding:12px 22px;border:none;border-radius:10px;
+  font-size:13px;font-weight:600;cursor:pointer;transition:.2s;
+  background:transparent;color:rgba(255,255,255,.38);
+}
+.product-btn:hover{color:rgba(255,255,255,.6)}
+.product-btn.active{color:#fff}
+.product-btn.coach.active{background:#07c160;box-shadow:0 2px 16px rgba(7,193,96,.25)}
+.product-btn.hr.active{background:#5b6eff;box-shadow:0 2px 16px rgba(91,110,255,.25)}
+
+/* ===== MAIN ===== */
+main{max-width:900px;margin:0 auto;padding:44px 28px 80px}
+
+/* ===== TABS ===== */
+.tabs{
+  display:flex;gap:16px;margin-bottom:36px;flex-wrap:wrap;
+  justify-content:center;
+}
+.tab-btn{
+  padding:14px 32px;
+  border:1px solid rgba(255,255,255,.05);border-radius:28px;
+  font-size:14px;cursor:pointer;transition:.2s;
+  background:rgba(255,255,255,.012);color:rgba(255,255,255,.42);font-weight:500;
+}
+.tab-btn:hover{background:rgba(255,255,255,.04);color:rgba(255,255,255,.7)}
+.tab-btn.active{background:rgba(255,255,255,.04);color:#fff;border-color:rgba(255,255,255,.1)}
+.tab-btn.coach-active{border-color:rgba(7,193,96,.3);color:#07c160;background:rgba(7,193,96,.04)}
+.tab-btn.hr-active{border-color:rgba(91,110,255,.3);color:#5b6eff;background:rgba(91,110,255,.04)}
+
+/* ===== PANELS ===== */
+.panel{display:none}
+.panel.show{display:block}
+
+/* ===== CARDS ===== */
+.card{
+  background:rgba(18,18,32,.65);
+  border:1px solid rgba(255,255,255,.04);
+  border-radius:18px;padding:40px;margin-bottom:32px;
+  backdrop-filter:blur(8px);
+}
+.card-title{
+  font-size:17px;font-weight:700;margin-bottom:28px;
+  display:flex;align-items:center;gap:10px;color:#e8e8e8;
+}
+.card-subtitle{
+  font-size:13px;color:rgba(255,255,255,.28);
+  margin:-20px 0 28px;font-weight:400;line-height:1.6;
+}
+
+/* ===== FORM ===== */
+.form-group{margin-bottom:28px}
+label{
+  display:block;font-size:12px;color:rgba(255,255,255,.38);
+  margin-bottom:8px;font-weight:600;letter-spacing:.3px;
+}
+input,select,textarea{
+  width:100%;padding:14px 18px;
+  border:1px solid rgba(255,255,255,.06);border-radius:10px;
+  background:rgba(0,0,0,.22);color:#e0e0e0;font-size:14px;font-family:inherit;
+  transition:.2s;
+}
+input::placeholder,select::placeholder{color:rgba(255,255,255,.15)}
+input:focus,select:focus,textarea:focus{outline:none}
+.coach-focus:focus{border-color:#07c160;box-shadow:0 0 0 3px rgba(7,193,96,.04)}
+.hr-focus:focus{border-color:#5b6eff;box-shadow:0 0 0 3px rgba(91,110,255,.04)}
+select{
+  appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'%3E%3C/path%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 16px center;padding-right:44px;
+}
+select option{background:#1a1a2e;color:#e0e0e0}
+.form-row{display:flex;gap:24px;flex-wrap:wrap}
+.form-col{flex:1;min-width:160px}
+
+.hint{
+  font-size:12px;color:rgba(255,255,255,.22);margin-top:8px;
+  display:flex;align-items:center;gap:6px;
+}
+.hint.coin{color:#ffa940}
+
+/* ===== BUTTONS ===== */
+.btn{
+  padding:12px 24px;border:none;border-radius:10px;
+  font-size:13px;font-weight:600;cursor:pointer;transition:.2s;letter-spacing:.2px;
+  display:inline-flex;align-items:center;gap:8px;
+}
+.btn-lg{padding:16px 32px;font-size:15px;width:100%;justify-content:center}
+.btn-coach{background:linear-gradient(135deg,#07c160,#05a04f);color:#fff;box-shadow:0 2px 8px rgba(7,193,96,.12)}
+.btn-coach:hover{box-shadow:0 6px 24px rgba(7,193,96,.3);transform:translateY(-1px)}
+.btn-hr{background:linear-gradient(135deg,#5b6eff,#4a4fcf);color:#fff;box-shadow:0 2px 8px rgba(91,110,255,.12)}
+.btn-hr:hover{box-shadow:0 6px 24px rgba(91,110,255,.3);transform:translateY(-1px)}
+.btn-outline{
+  background:transparent;border:1px solid rgba(255,255,255,.1);
+  color:rgba(255,255,255,.5);padding:10px 18px;font-size:12px;
+}
+.btn-outline:hover{background:rgba(255,255,255,.04);color:#fff}
+.btn-sm{padding:8px 16px;font-size:11px;border-radius:8px}
+.btn-danger{background:rgba(255,77,77,.06);border:1px solid rgba(255,77,77,.12);color:#ff6b6b}
+.btn-danger:hover{background:rgba(255,77,77,.14)}
+.btn-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:12px}
+
+/* ===== CODE OUTPUT ===== */
+.code-box{
+  background:rgba(0,0,0,.35);border-radius:16px;padding:36px;text-align:center;
+  margin:28px 0;border:1px solid rgba(255,255,255,.04);
+}
+.code-label{font-size:10px;color:rgba(255,255,255,.18);text-transform:uppercase;letter-spacing:3px;margin-bottom:10px}
+.code{
+  font-size:24px;font-weight:700;letter-spacing:4px;
+  font-family:'SF Mono','Courier New',monospace;word-break:break-all;
+}
+.code.coach-code{color:#07c160}
+.code.hr-code{color:#5b6eff}
+.code-info{font-size:12px;color:rgba(255,255,255,.28);margin-top:14px;line-height:1.8}
+
+/* ===== STATS ===== */
+.stat-row{display:flex;gap:24px;flex-wrap:wrap;margin-bottom:32px}
+.stat-card{
+  flex:1;min-width:150px;
+  background:rgba(18,18,32,.55);border:1px solid rgba(255,255,255,.035);
+  border-radius:16px;padding:26px 20px;text-align:center;
+}
+.stat-num{font-size:36px;font-weight:700;letter-spacing:-1px}
+.stat-label{font-size:12px;color:rgba(255,255,255,.26);margin-top:8px;font-weight:500}
+
+/* ===== TABLES ===== */
+.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;font-size:12px;white-space:nowrap}
+th{
+  text-align:left;padding:14px 12px;
+  border-bottom:1px solid rgba(255,255,255,.06);
+  color:rgba(255,255,255,.32);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.5px;
+}
+td{padding:14px 12px;border-bottom:1px solid rgba(255,255,255,.025);color:rgba(255,255,255,.58)}
+tr:hover td{background:rgba(255,255,255,.012)}
+
+/* ===== BADGES ===== */
+.badge{
+  display:inline-block;padding:4px 12px;border-radius:14px;font-size:10px;font-weight:600;
+  letter-spacing:.2px;
+}
+.badge-coach{background:rgba(7,193,96,.08);color:#07c160}
+.badge-hr{background:rgba(91,110,255,.08);color:#5b6eff}
+
+/* ===== DISTRIBUTOR LIST ===== */
+.dist-list-item{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:20px 22px;
+  border:1px solid rgba(255,255,255,.035);border-radius:14px;
+  margin-bottom:10px;gap:20px;flex-wrap:wrap;
+  background:rgba(18,18,32,.35);transition:.2s;
+}
+.dist-list-item:hover{border-color:rgba(255,255,255,.07);background:rgba(18,18,32,.5)}
+.dist-info{flex:1;min-width:200px}
+.dist-name{font-weight:600;font-size:14px;color:#e8e8e8}
+.dist-meta{font-size:12px;color:rgba(255,255,255,.28);margin-top:6px;line-height:1.6}
+
+/* ===== EMPTY STATE ===== */
+.empty-state{
+  text-align:center;padding:56px 20px;color:rgba(255,255,255,.12);font-size:14px;line-height:2;
+}
+
+/* ===== TOAST ===== */
+.toast{
+  position:fixed;top:28px;left:50%;transform:translateX(-50%);
+  background:rgba(0,0,0,.92);color:#fff;padding:13px 30px;border-radius:26px;
+  font-size:14px;z-index:99;opacity:0;transition:.3s;pointer-events:none;
+  box-shadow:0 8px 32px rgba(0,0,0,.6);backdrop-filter:blur(8px);
+}
+.toast.show{opacity:1}
+
+/* ===== MODAL ===== */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.78);
+  display:flex;align-items:center;justify-content:center;z-index:50;padding:28px;
+}
+.modal-overlay.hidden{display:none}
+.modal{
+  background:rgba(20,20,38,.98);border:1px solid rgba(255,255,255,.06);
+  border-radius:20px;padding:40px;width:100%;max-width:480px;max-height:85vh;overflow-y:auto;
+}
+.modal h3{font-size:18px;font-weight:700;margin-bottom:28px;color:#e8e8e8}
+.modal .btn-row{margin-top:28px;justify-content:flex-end}
+
+/* ===== NOTE ===== */
+.note{
+  background:rgba(255,255,255,.015);border:1px solid rgba(255,255,255,.03);
+  border-radius:14px;padding:20px;font-size:12px;color:rgba(255,255,255,.28);line-height:1.9;margin-top:24px;
+}
+
+/* ===== WORKFLOW BAR ===== */
+.workflow-bar{
+  display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+  padding:16px 22px;
+  background:rgba(255,255,255,.012);border:1px solid rgba(255,255,255,.025);
+  border-radius:14px;margin-bottom:32px;font-size:12px;color:rgba(255,255,255,.28);
+}
+.workflow-step{
+  padding:5px 14px;border-radius:16px;
+  background:rgba(255,255,255,.025);font-weight:600;color:rgba(255,255,255,.48);
+  white-space:nowrap;
+}
+.workflow-arrow{color:rgba(255,255,255,.08);font-size:10px}
+
+/* ===== UTILS ===== */
+.muted{color:rgba(255,255,255,.18);font-size:11px}
+.text-green{color:#07c160}
+.text-blue{color:#5b6eff}
+.text-amber{color:#ffa940}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:640px){
+  header{padding:14px 20px;gap:16px}
+  .brand-name{font-size:15px}
+  .product-btn{padding:10px 16px;font-size:12px}
+  main{padding:28px 16px 48px}
+  .tabs{gap:10px;margin-bottom:28px}
+  .tab-btn{padding:12px 22px;font-size:13px}
+  .card{padding:26px 18px;margin-bottom:24px}
+  .stat-card{min-width:110px;padding:18px}
+  .stat-num{font-size:26px}
+  .stat-row{gap:12px}
+  table{font-size:10px}
+  th,td{padding:10px 6px}
+  .form-row{gap:16px}
+  .workflow-bar{gap:6px;padding:12px 14px}
+  .workflow-step{font-size:10px;padding:4px 10px}
+  .workflow-arrow{font-size:8px}
+  .code-box{padding:24px 16px}
+  .code{font-size:18px;letter-spacing:2px}
+  .dist-list-item{padding:16px}
+}
+
+/* ===== BATCH MODE ===== */
+.mode-toggle{display:flex;gap:4px;background:rgba(255,255,255,.025);border-radius:12px;padding:4px;margin-bottom:24px;border:1px solid rgba(255,255,255,.04)}
+.mode-btn-batch{flex:1;padding:10px 16px;border:none;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;transition:.2s;background:transparent;color:rgba(255,255,255,.38)}
+.mode-btn-batch:hover{color:rgba(255,255,255,.6)}
+.mode-btn-batch.active{color:#fff}
+.mode-btn-batch.coach-active{background:#07c160;box-shadow:0 2px 16px rgba(7,193,96,.25)}
+.mode-btn-batch.hr-active{background:#5b6eff;box-shadow:0 2px 16px rgba(91,110,255,.25)}
+.batch-progress-bar{height:6px;background:rgba(255,255,255,.05);border-radius:3px;margin:16px 0;overflow:hidden;display:none}
+.batch-progress-bar .fill{height:100%;border-radius:3px;transition:width .15s}
+.batch-progress-bar .fill.coach{background:#07c160}
+.batch-progress-bar .fill.hr{background:#5b6eff}
+.batch-progress-text{text-align:center;font-size:12px;color:rgba(255,255,255,.28);margin-bottom:8px;display:none}
+.batch-table-wrap{max-height:420px;overflow-y:auto;margin-top:16px}
+.batch-table{width:100%;border-collapse:collapse;font-size:12px}
+.batch-table th{position:sticky;top:0;background:rgba(18,18,32,.95);backdrop-filter:blur(8px)}
+.batch-code{font-family:'SF Mono','Courier New',monospace;font-size:11px;letter-spacing:1px}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand-row">
+    <img class="logo-img" src="logo.png" alt="安迪" onerror="this.style.display='none'">
+    <div>
+      <div class="brand-name">安迪 AI调度师</div>
+      <div class="brand-sub">激活码 · 分销 · 佣金</div>
+    </div>
+  </div>
+  <div class="product-switch">
+    <button class="product-btn coach active" onclick="switchProduct('coach')">AI面试辅导</button>
+    <button class="product-btn hr" onclick="switchProduct('hr')">企业AI面试官</button>
+  </div>
+</header>
+
+<main>
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab-btn active coach-active" id="tabBtn1" onclick="switchTab('generate')">🎫 生成激活码</button>
+    <button class="tab-btn" id="tabBtn2" onclick="switchTab('distributors')">👥 分销人管理</button>
+    <button class="tab-btn" id="tabBtn3" onclick="switchTab('dashboard')">💰 佣金看板</button>
+    <button class="tab-btn" id="tabBtn4" onclick="switchTab('customers')">👤 客户管理</button>
+  </div>
+
+  <!-- ===== Panel 1: Generate Code ===== -->
+  <div class="panel show" id="panel-generate">
+
+    <!-- Workflow hint -->
+    <div class="workflow-bar">
+      <span style="color:rgba(255,255,255,.4)">流程：</span>
+      <span class="workflow-step">1. 客户加你微信付款</span>
+      <span class="workflow-arrow">→</span>
+      <span class="workflow-step">2. 你选产品+分销人</span>
+      <span class="workflow-arrow">→</span>
+      <span class="workflow-step">3. 生成激活码</span>
+      <span class="workflow-arrow">→</span>
+      <span class="workflow-step">4. 发码给客户</span>
+      <span class="workflow-arrow">→</span>
+      <span class="workflow-step">5. 客户激活使用</span>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🎫 生成激活码</div>
+
+      <!-- Mode Toggle -->
+      <div class="mode-toggle">
+        <button class="mode-btn-batch active coach-active" id="modeSingle" onclick="switchGenMode('single')">🎫 单个生成</button>
+        <button class="mode-btn-batch" id="modeBatch" onclick="switchGenMode('batch')">📦 批量生成</button>
+      </div>
+
+      <!-- Single Mode Fields -->
+      <div id="singleFields">
+        <div class="form-group">
+          <label>客户称呼</label>
+          <input type="text" id="custName" placeholder="例如：张三 或 XX公司HR李经理" class="coach-focus">
+        </div>
+      </div>
+
+      <!-- Batch Mode Fields -->
+      <div id="batchFields" style="display:none">
+        <div class="form-row">
+          <div class="form-col form-group">
+            <label>批次前缀</label>
+            <input type="text" id="batchPrefix" placeholder="例如：XX大学就业办" class="coach-focus">
+          </div>
+          <div class="form-col form-group">
+            <label>生成数量</label>
+            <input type="number" id="batchCount" value="10" min="1" max="200" class="coach-focus">
+          </div>
+        </div>
+        <div class="hint">每个学生将生成独立激活码，名称格式：前缀-001、前缀-002...</div>
+      </div>
+
+      <div class="form-group">
+        <label>分销来源</label>
+        <select id="distributor" class="coach-focus">
+          <option value="">🟢 直接客户（无分销人）</option>
+        </select>
+        <div class="hint coin" id="commissionHint" style="display:none"></div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-col form-group">
+          <label>套餐类型</label>
+          <select id="plan" class="coach-focus">
+            <option value="trial">🎁 体验卡 - 3天（限3次）</option>
+            <option value="week">周卡 - 7天</option>
+            <option value="month" selected>月卡 - 30天</option>
+            <option value="quarter">季卡 - 90天</option>
+            <option value="halfyear">半年卡 - 180天</option>
+            <option value="year">年卡 - 365天</option>
+            <option value="custom">自定义天数</option>
+          </select>
+        </div>
+        <div class="form-col form-group">
+          <label>使用次数上限</label>
+          <select id="uses" class="coach-focus">
+            <option value="3">3次（体验）</option>
+            <option value="10">10次</option>
+            <option value="30" selected>30次</option>
+            <option value="50">50次</option>
+            <option value="100">100次</option>
+            <option value="200">200次</option>
+            <option value="500">500次</option>
+            <option value="0">不限次数</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group" id="customDaysBox" style="display:none">
+        <label>自定义天数</label>
+        <input type="number" id="customDays" value="30" min="1" max="365" class="coach-focus">
+      </div>
+
+      <button class="btn btn-lg" id="genBtn" onclick="generateCode()">🎫 生成激活码</button>
+
+      <!-- Batch Progress -->
+      <div class="batch-progress-text" id="batchProgressText"></div>
+      <div class="batch-progress-bar" id="batchProgressBar"><div class="fill" id="batchProgressFill"></div></div>
+
+      <!-- Single Output -->
+      <div id="output" style="display:none">
+        <div class="code-box">
+          <div class="code-label">激活码</div>
+          <div class="code coach-code" id="codeDisplay"></div>
+          <div class="code-info" id="codeInfo"></div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-outline" onclick="copyCode()">📋 复制激活码</button>
+          <button class="btn btn-outline" onclick="copySendMsg()">💬 复制发送话术</button>
+        </div>
+      </div>
+
+      <!-- Batch Output -->
+      <div id="batchOutput" style="display:none">
+        <div class="btn-row" style="margin-bottom:12px">
+          <button class="btn btn-lg" onclick="copyBatchCodes()">📋 一键复制全部激活码</button>
+          <button class="btn btn-outline" onclick="copyBatchTable()">📊 复制完整表格</button>
+        </div>
+        <div class="batch-table-wrap">
+          <table class="batch-table">
+            <thead><tr><th>#</th><th>客户名称</th><th>激活码</th><th style="width:60px">操作</th></tr></thead>
+            <tbody id="batchTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- History -->
+    <div class="card">
+      <div class="card-title">📋 最近生成记录</div>
+      <div class="table-wrap" id="historyTable">
+        <div class="empty-state">暂无记录</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Panel 2: Distributor Management ===== -->
+  <div class="panel" id="panel-distributors">
+    <div class="card">
+      <div class="card-title">👥 分销人管理</div>
+      <p class="card-subtitle">分销人帮你拉客，你发码收钱。佣金按比例自动计算。</p>
+      <div id="distList"></div>
+      <button class="btn btn-outline" onclick="showAddDistModal()" style="margin-top:16px">＋ 添加分销人</button>
+      <div class="note">
+        💡 <strong>怎么用？</strong> 你的分销人（朋友、客户、群友）在朋友圈/小红书帮你推广 → 有人加你微信咨询 → 你问一句"谁介绍的？" → 生成激活码时选对应的分销人 → 系统自动算佣金。
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Panel 3: Commission Dashboard ===== -->
+  <div class="panel" id="panel-dashboard">
+    <div class="stat-row" id="statCards"></div>
+    <div class="card">
+      <div class="card-title">📊 分销业绩明细</div>
+      <div style="margin-bottom:20px">
+        <select id="dashFilter" onchange="renderDashboard()" class="coach-focus" style="width:auto;min-width:160px">
+          <option value="all">全部产品</option>
+          <option value="coach">AI面试辅导</option>
+          <option value="hr">企业AI面试官</option>
+        </select>
+      </div>
+      <div class="table-wrap" id="dashTable">
+        <div class="empty-state">暂无分销数据</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Panel 4: Customer Management ===== -->
+  <div class="panel" id="panel-customers">
+    <div class="card">
+      <div class="card-title">👤 客户管理 & 续费</div>
+      <p class="card-subtitle" id="customerSummary">加载中...</p>
+      <div class="table-wrap" id="customerTable">
+        <div class="empty-state">暂无客户数据</div>
+      </div>
+    </div>
+    <div class="note" style="margin-top:16px">
+      💡 <strong>续费说明：</strong>选择客户后可延长到期时间或添加使用次数。新激活码需重新生成，旧的 jsonblob 存储槽可直接更新次数上限。<br>
+      ⚠️ <strong>旧版激活码：</strong>没有 jsonblob 追踪的旧码会标记为「离线码」，无法远程续费，需重新生成新码。
+    </div>
+  </div>
+</main>
+
+<!-- Add/Edit Distributor Modal -->
+<div class="modal-overlay hidden" id="distModal">
+  <div class="modal">
+    <h3 id="distModalTitle">添加分销人</h3>
+    <input type="hidden" id="distEditId">
+
+    <div class="form-group">
+      <label>姓名 / 昵称 *</label>
+      <input type="text" id="distName" placeholder="如：小美 / 张姐" class="coach-focus">
+    </div>
+
+    <div class="form-group">
+      <label>联系方式</label>
+      <input type="text" id="distContact" placeholder="微信或手机号（选填）" class="coach-focus">
+    </div>
+
+    <div class="form-group">
+      <label>佣金比例 (%) *</label>
+      <input type="number" id="distRate" placeholder="20" value="20" min="1" max="100" class="coach-focus">
+      <div class="hint">客户付 ¥99，佣金 20% = 你付分销人 ¥19.80</div>
+    </div>
+
+    <div class="form-group">
+      <label>备注</label>
+      <input type="text" id="distNote" placeholder="选填" class="coach-focus">
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-outline btn-sm" onclick="document.getElementById('distModal').classList.add('hidden')">取消</button>
+      <button class="btn btn-lg" style="width:auto" id="distSaveBtn" onclick="saveDistributor()">💾 保存</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ========== STATE ==========
+const SECRETS = {
+  coach: 'miaoan1913_AI_COACH_2026_KEY',
+  hr: 'miaoan1913_AI_HR_ENTERPRISE_2026'
+};
+const JSONBLOB_API = 'https://jsonblob.com/api/jsonBlob';
+const PLAN_DAYS = { trial:3, week:7, month:30, quarter:90, halfyear:180, year:365 };
+const PRODUCT_META = {
+  coach: { name:'AI面试辅导', id:'coach' },
+  hr: { name:'企业AI面试官', id:'hr' }
+};
+const PRICES = {
+  coach: { trial:0, week:9, month:19, quarter:99, halfyear:199, year:299 },
+  hr: { trial:0, week:29, month:99, quarter:199, halfyear:349, year:499 }
+};
+
+let currentProduct = 'coach';
+let currentTab = 'generate';
+let genMode = 'single';
+let batchResults = [];
+
+// ========== INIT ==========
+function init() {
+  switchProduct('coach');
+  switchTab('generate');
+  renderDistributorSelect();
+}
+init();
+
+// ========== PRODUCT SWITCH ==========
+function switchProduct(p) {
+  currentProduct = p;
+  document.querySelectorAll('.product-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector(`.product-btn.${p}`).classList.add('active');
+
+  document.querySelectorAll('input,select,textarea').forEach(el => {
+    el.classList.remove('coach-focus','hr-focus');
+    el.classList.add(p==='coach'?'coach-focus':'hr-focus');
+  });
+
+  document.getElementById('genBtn').className = `btn btn-lg btn-${p}`;
+  document.getElementById('distSaveBtn').className = `btn btn-lg btn-${p}`;
+  document.getElementById('distSaveBtn').style.width = 'auto';
+
+  document.querySelectorAll('.tab-btn').forEach(b => {
+    b.classList.remove('coach-active','hr-active');
+    if(b.classList.contains('active')) b.classList.add(p==='coach'?'coach-active':'hr-active');
+  });
+
+  document.getElementById('customDaysBox').style.display = document.getElementById('plan').value === 'custom' ? 'block' : 'none';
+
+  if (p === 'hr') {
+    document.getElementById('uses').value = '50';
+  } else {
+    document.getElementById('uses').value = '30';
+  }
+
+  renderDistributorSelect();
+  updateCommissionHint();
+  renderHistory();
+  updateModeBtnStyle();
+}
+
+// ========== TAB SWITCH ==========
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('show'));
+  document.querySelectorAll('.tab-btn').forEach(b => {
+    b.classList.remove('active','coach-active','hr-active');
+  });
+  document.getElementById('panel-'+tab).classList.add('show');
+  const tabBtn = document.getElementById('tabBtn'+{generate:'1',distributors:'2',dashboard:'3',customers:'4'}[tab]);
+  tabBtn.classList.add('active');
+  tabBtn.classList.add(currentProduct==='coach'?'coach-active':'hr-active');
+
+  if (tab === 'distributors') renderDistList();
+  if (tab === 'dashboard') renderDashboard();
+  if (tab === 'generate') renderHistory();
+  if (tab === 'customers') renderCustomers();
+}
+
+// ========== ENCRYPTION ==========
+function encrypt(text, key) {
+  let bytes = '';
+  for (let i = 0; i < text.length; i++) {
+    let c = text.charCodeAt(i) ^ key.charCodeAt(i % key.length);
+    bytes += String.fromCharCode((c >> 8) & 0xFF);
+    bytes += String.fromCharCode(c & 0xFF);
+  }
+  return btoa(bytes).replace(/[+/=]/g, c => ({'+':'.','/':'_','=':''}[c]));
+}
+function simpleHash(str) {
+  let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+  for (let i = 0; i < str.length; i++) {
+    let ch = str.charCodeAt(i);
+    h1 = Math.imul(h1 ^ ch, 2654435761);
+    h2 = Math.imul(h2 ^ ch, 1597334677);
+  }
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507);
+  h2 = Math.imul(h2 ^ (h2 >>> 16), 3266489909);
+  return (h1 ^ h2) >>> 0;
+}
+
+// ========== GENERATE CODE ==========
+function switchGenMode(mode) {
+  genMode = mode;
+  document.getElementById('modeSingle').classList.toggle('active', mode === 'single');
+  document.getElementById('modeBatch').classList.toggle('active', mode === 'batch');
+  document.getElementById('singleFields').style.display = mode === 'single' ? 'block' : 'none';
+  document.getElementById('batchFields').style.display = mode === 'batch' ? 'block' : 'none';
+  document.getElementById('output').style.display = 'none';
+  document.getElementById('batchOutput').style.display = 'none';
+  document.getElementById('genBtn').textContent = mode === 'single' ? '🎫 生成激活码' : '📦 批量生成';
+  document.getElementById('batchProgressBar').style.display = 'none';
+  document.getElementById('batchProgressText').style.display = 'none';
+  updateModeBtnStyle();
+}
+
+function updateModeBtnStyle() {
+  const p = currentProduct;
+  ['modeSingle','modeBatch'].forEach(id => {
+    const btn = document.getElementById(id);
+    btn.classList.remove('coach-active','hr-active');
+    if (btn.classList.contains('active')) {
+      btn.classList.add(p === 'coach' ? 'coach-active' : 'hr-active');
+    }
+  });
+  document.getElementById('genBtn').className = 'btn btn-lg btn-' + p;
+}
+
+async function generateCode() {
+  if (genMode === 'batch') { await generateBatch(); return; }
+
+  const name = document.getElementById('custName').value.trim();
+  if (!name) { showToast('请填写客户称呼'); return; }
+  const plan = document.getElementById('plan').value;
+  let days = plan === 'custom' ? parseInt(document.getElementById('customDays').value) || 30 : PLAN_DAYS[plan];
+  const uses = parseInt(document.getElementById('uses').value);
+  const distId = document.getElementById('distributor').value;
+
+  const genBtn = document.getElementById('genBtn');
+  genBtn.disabled = true; genBtn.textContent = '⏳ 正在创建存储...';
+
+  // Step 1: 在 jsonblob 创建绑定追踪槽
+  let blobId = '', useCloud = true;
+  try {
+    const blobResp = await fetch(JSONBLOB_API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ bindings: [], maxBindings: 3, totalUses: 0, product: currentProduct, createdAt: new Date().toISOString() })
+    });
+    if (!blobResp.ok) throw new Error('HTTP '+blobResp.status);
+    const location = blobResp.headers.get('Location') || '';
+    blobId = location.split('/').pop() || '';
+    if (!blobId) throw new Error('no blob id');
+  } catch (e) {
+    console.warn('jsonblob 创建失败，降级为离线码:', e.message);
+    useCloud = false; blobId = '';
+  }
+
+  const now = new Date();
+  const expiryDate = new Date(now.getTime() + days * 86400000);
+  const expiryStr = expiryDate.toISOString().slice(0,10);
+  const randomId = Math.random().toString(36).substring(2,6).toUpperCase();
+
+  const payload = expiryStr + '|' + uses + '|' + name + '|' + randomId + '|' + distId + (blobId ? '|' + blobId : '');
+  const secret = SECRETS[currentProduct];
+  const encrypted = encrypt(payload, secret);
+  const hash = simpleHash(encrypted + secret).toString(16).slice(0,4).toUpperCase();
+  const fullCode = encrypted + hash;
+  const formatted = fullCode.match(/.{1,4}/g).join('-');
+
+  const codeDisplay = document.getElementById('codeDisplay');
+  codeDisplay.textContent = formatted;
+  codeDisplay.className = 'code ' + (currentProduct==='coach'?'coach-code':'hr-code');
+
+  let distLabel = '直接客户';
+  if (distId) {
+    const dists = getDistributors();
+    const d = dists.find(x => x.id === distId);
+    if (d) distLabel = d.name;
+  }
+
+  const planLabels = { trial:'体验卡', week:'周卡', month:'月卡', quarter:'季卡', halfyear:'半年卡', year:'年卡', custom:'自定义' };
+  document.getElementById('codeInfo').textContent =
+    '产品：'+PRODUCT_META[currentProduct].name +
+    ' · '+planLabels[plan] +
+    ' · 到期：'+expiryStr +
+    ' · 次数：'+(uses===0?'不限':uses+'次') +
+    ' · 客户：'+name +
+    ' · 分销人：'+distLabel +
+    (useCloud ? '' : ' · ⚠️ 离线码（无跨设备追踪）');
+
+  document.getElementById('output').style.display = 'block';
+  saveSale(name, formatted, expiryStr, uses, plan, distId, blobId);
+  genBtn.disabled = false; genBtn.textContent = '🎫 生成激活码';
+  showToast(useCloud ? '✅ 激活码已生成！' : '⚠️ 已生成离线码（jsonblob不可用，无跨设备追踪）');
+}
+
+function copyCode() {
+  const code = document.getElementById('codeDisplay').textContent;
+  if (!code) return;
+  navigator.clipboard.writeText(code).then(() => showToast('✅ 已复制激活码'));
+}
+
+function copySendMsg() {
+  const code = document.getElementById('codeDisplay').textContent;
+  const info = document.getElementById('codeInfo').textContent;
+  if (!code) return;
+  const meta = PRODUCT_META[currentProduct];
+  const urls = {
+    coach: 'https://andy-miaoan.github.io/AI-Interview-Tools/AI面试辅导/工具_AI面试辅导工作台.html',
+    hr: 'https://andy-miaoan.github.io/AI-Interview-Tools/企业AI面试官/工具_企业AI面试官工作台.html'
+  };
+  const features = {
+    coach: '简历优化、简历生成、模拟面试、谈薪指导、试用期护航',
+    hr: 'JD优化、简历筛选、面试题库、面试分析、谈薪策略、试用期管理'
+  };
+  const msg = `您好，您的「${meta.name}」已开通！
+
+🔑 激活码：${code}
+📅 ${info}
+
+使用步骤：
+1. 打开工作台链接
+2. 输入激活码
+3. 使用${features[currentProduct]}
+
+工作台：${urls[currentProduct]}
+客服微信：miaoan1913`;
+  navigator.clipboard.writeText(msg).then(() => showToast('✅ 话术已复制！'));
+}
+
+// ========== BATCH GENERATE ==========
+async function generateBatch() {
+  const prefix = document.getElementById('batchPrefix').value.trim();
+  const count = parseInt(document.getElementById('batchCount').value);
+  if (!prefix) { showToast('请填写批次前缀'); return; }
+  if (isNaN(count) || count < 1 || count > 200) { showToast('数量请输入 1-200'); return; }
+
+  const plan = document.getElementById('plan').value;
+  let days = plan === 'custom' ? parseInt(document.getElementById('customDays').value) || 30 : PLAN_DAYS[plan];
+  const uses = parseInt(document.getElementById('uses').value);
+  const distId = document.getElementById('distributor').value;
+  const secret = SECRETS[currentProduct];
+
+  const genBtn = document.getElementById('genBtn');
+  const progressBar = document.getElementById('batchProgressBar');
+  const progressFill = document.getElementById('batchProgressFill');
+  const progressText = document.getElementById('batchProgressText');
+
+  genBtn.disabled = true; genBtn.textContent = '⏳ 批量生成中...';
+  progressBar.style.display = 'block';
+  progressText.style.display = 'block';
+  document.getElementById('output').style.display = 'none';
+  document.getElementById('batchOutput').style.display = 'none';
+
+  batchResults = [];
+  let batchOfflineMode = false;
+  const now = new Date();
+  const expiryDate = new Date(now.getTime() + days * 86400000);
+  const expiryStr = expiryDate.toISOString().slice(0, 10);
+  const pad = String(count).length;
+
+  for (let i = 1; i <= count; i++) {
+    const idx = String(i).padStart(pad, '0');
+    const name = prefix + '-' + idx;
+    const randomId = Math.random().toString(36).substring(2, 6).toUpperCase();
+
+    // 每个码创建独立 jsonblob 存储槽
+    let blobId = '';
+    try {
+      if (batchOfflineMode) throw new Error('skip');
+      const blobResp = await fetch(JSONBLOB_API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ bindings: [], maxBindings: 3, totalUses: 0, product: currentProduct, createdAt: new Date().toISOString() })
+      });
+      if (!blobResp.ok) throw new Error('HTTP '+blobResp.status);
+      const location = blobResp.headers.get('Location') || '';
+      blobId = location.split('/').pop() || '';
+      if (!blobId) throw new Error('no id');
+    } catch (e) {
+      if (!batchOfflineMode && i > 1) {
+        // 首个之后的码再失败才停止
+        genBtn.disabled = false; genBtn.textContent = '📦 批量生成';
+        progressBar.style.display = 'none'; progressText.style.display = 'none';
+        showToast('⚠️ 第 ' + i + ' 个码网络不通，已停止。已生成 ' + batchResults.length + ' 个');
+        renderBatchTable();
+        if (batchResults.length > 0) document.getElementById('batchOutput').style.display = 'block';
+        return;
+      }
+      // 第1个码就失败 → 全部降级为离线码
+      console.warn('jsonblob 创建失败，批量降级为离线码:', e.message);
+      batchOfflineMode = true;
+      blobId = '';
+    }
+
+    const payload = expiryStr + '|' + uses + '|' + name + '|' + randomId + '|' + distId + (blobId ? '|' + blobId : '');
+    const encrypted = encrypt(payload, secret);
+    const hash = simpleHash(encrypted + secret).toString(16).slice(0, 4).toUpperCase();
+    const fullCode = encrypted + hash;
+    const formatted = fullCode.match(/.{1,4}/g).join('-');
+
+    batchResults.push({ index: i, name, code: formatted, expiry: expiryStr, uses, plan, distId });
+
+    // 更新进度
+    const pct = Math.round(i / count * 100);
+    progressFill.style.width = pct + '%';
+    progressFill.className = 'fill ' + currentProduct;
+    progressText.textContent = '正在生成：' + i + ' / ' + count + ' （' + pct + '%）';
+
+    saveSale(name, formatted, expiryStr, uses, plan, distId, blobId);
+  }
+
+  genBtn.disabled = false; genBtn.textContent = '📦 批量生成';
+  progressBar.style.display = 'none'; progressText.style.display = 'none';
+  renderBatchTable();
+  document.getElementById('batchOutput').style.display = 'block';
+  showToast(batchOfflineMode ? '⚠️ 已生成 ' + count + ' 个离线码（jsonblob不可用，无跨设备追踪）' : '✅ 已生成 ' + count + ' 个激活码！');
+}
+
+function renderBatchTable() {
+  const tbody = document.getElementById('batchTableBody');
+  tbody.innerHTML = batchResults.map(r => `<tr>
+    <td class="muted">${r.index}</td>
+    <td>${r.name}</td>
+    <td class="batch-code" style="color:${currentProduct==='coach'?'#07c160':'#5b6eff'}">${r.code}</td>
+    <td><button class="btn btn-outline btn-sm" onclick="copyOneBatch('${r.code.replace(/'/g, "\\'")}')">📋</button></td>
+  </tr>`).join('');
+}
+
+function copyOneBatch(code) {
+  navigator.clipboard.writeText(code).then(() => showToast('✅ 已复制'));
+}
+
+function copyBatchCodes() {
+  const text = batchResults.map(r => r.code).join('\n');
+  navigator.clipboard.writeText(text).then(() => showToast('✅ 已复制 ' + batchResults.length + ' 个激活码'));
+}
+
+function copyBatchTable() {
+  const text = batchResults.map(r => r.index + '\t' + r.name + '\t' + r.code).join('\n');
+  navigator.clipboard.writeText(text).then(() => showToast('✅ 已复制表格数据，可粘贴到 Excel'));
+}
+
+// ========== DISTRIBUTOR CRUD ==========
+function getDistributors() {
+  return JSON.parse(localStorage.getItem('andy_distributors') || '[]');
+}
+function saveDistributors(dists) {
+  localStorage.setItem('andy_distributors', JSON.stringify(dists));
+}
+
+function renderDistributorSelect() {
+  const dists = getDistributors();
+  const sel = document.getElementById('distributor');
+  sel.innerHTML = '<option value="">🟢 直接客户（无分销人）</option>';
+  dists.forEach(d => {
+    sel.innerHTML += `<option value="${d.id}">👤 ${d.name}（佣金${d.rate}%）</option>`;
+  });
+  document.getElementById('commissionHint').style.display = 'none';
+}
+
+function renderDistList() {
+  const dists = getDistributors();
+  const container = document.getElementById('distList');
+  if (dists.length === 0) {
+    container.innerHTML = '<div class="empty-state">还没有添加分销人<br>点击下方按钮添加第一个分销人</div>';
+    return;
+  }
+  container.innerHTML = dists.map(d => {
+    const sales = getSales().filter(s => s.distId === d.id);
+    const totalComm = sales.reduce((sum, s) => sum + (s.estCommission || 0), 0);
+    return `<div class="dist-list-item">
+      <div class="dist-info">
+        <div class="dist-name">👤 ${d.name} <span style="font-weight:400;font-size:12px;color:rgba(255,255,255,.35)">· 佣金 ${d.rate}%</span></div>
+        <div class="dist-meta">${d.contact||'未填联系方式'}${d.note?' · '+d.note:''} · 已售 <strong style="color:#fff">${sales.length}</strong> 单 · 预估佣金 <strong style="color:#ffa940">¥${totalComm.toFixed(2)}</strong></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-outline btn-sm" onclick="editDistributor('${d.id}')">✏️ 编辑</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteDistributor('${d.id}')">🗑</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function showAddDistModal() {
+  document.getElementById('distModalTitle').textContent = '添加分销人';
+  document.getElementById('distEditId').value = '';
+  document.getElementById('distName').value = '';
+  document.getElementById('distContact').value = '';
+  document.getElementById('distRate').value = '20';
+  document.getElementById('distNote').value = '';
+  document.getElementById('distModal').classList.remove('hidden');
+}
+
+function editDistributor(id) {
+  const dists = getDistributors();
+  const d = dists.find(x => x.id === id);
+  if (!d) return;
+  document.getElementById('distModalTitle').textContent = '编辑分销人';
+  document.getElementById('distEditId').value = id;
+  document.getElementById('distName').value = d.name;
+  document.getElementById('distContact').value = d.contact || '';
+  document.getElementById('distRate').value = d.rate;
+  document.getElementById('distNote').value = d.note || '';
+  document.getElementById('distModal').classList.remove('hidden');
+}
+
+function saveDistributor() {
+  const name = document.getElementById('distName').value.trim();
+  const rate = parseFloat(document.getElementById('distRate').value);
+  if (!name) { showToast('请填写姓名'); return; }
+  if (isNaN(rate) || rate < 0 || rate > 100) { showToast('佣金比例需在0-100之间'); return; }
+
+  const dists = getDistributors();
+  const editId = document.getElementById('distEditId').value;
+  const contact = document.getElementById('distContact').value.trim();
+  const note = document.getElementById('distNote').value.trim();
+
+  if (editId) {
+    const idx = dists.findIndex(d => d.id === editId);
+    if (idx >= 0) {
+      dists[idx].name = name;
+      dists[idx].contact = contact;
+      dists[idx].rate = rate;
+      dists[idx].note = note;
+    }
+  } else {
+    dists.push({
+      id: 'dist_' + Date.now(),
+      name, contact, rate, note,
+      createdAt: new Date().toISOString().slice(0,10)
+    });
+  }
+  saveDistributors(dists);
+  document.getElementById('distModal').classList.add('hidden');
+  renderDistList();
+  renderDistributorSelect();
+  showToast('✅ 已保存！');
+}
+
+function deleteDistributor(id) {
+  const dists = getDistributors();
+  const d = dists.find(x => x.id === id);
+  if (!confirm(`确定删除分销人「${d.name}」？\n\n历史销售记录不会被删除。`)) return;
+  saveDistributors(dists.filter(x => x.id !== id));
+  renderDistList();
+  renderDistributorSelect();
+  showToast('已删除');
+}
+
+// ========== SALES RECORDS ==========
+function getSales() {
+  return JSON.parse(localStorage.getItem('andy_sales_records') || '[]');
+}
+function saveSales(sales) {
+  if (sales.length > 200) sales = sales.slice(0, 200);
+  localStorage.setItem('andy_sales_records', JSON.stringify(sales));
+}
+
+function saveSale(name, code, expiry, uses, plan, distId, blobId) {
+  const sales = getSales();
+  let estPrice = (PRICES[currentProduct] || {})[plan] || 0;
+  let estCommission = 0;
+  if (distId) {
+    const dists = getDistributors();
+    const d = dists.find(x => x.id === distId);
+    if (d) estCommission = estPrice * (d.rate / 100);
+  }
+  sales.unshift({
+    id: 'sale_' + Date.now(),
+    name, code, expiry, uses, plan,
+    product: currentProduct,
+    distId: distId || '',
+    estPrice, estCommission,
+    blobId: blobId || '',
+    time: new Date().toLocaleString()
+  });
+  saveSales(sales);
+  renderHistory();
+}
+
+function renderHistory() {
+  const sales = getSales();
+  const container = document.getElementById('historyTable');
+  if (sales.length === 0) {
+    container.innerHTML = '<div class="empty-state">暂无记录</div>';
+    return;
+  }
+  const recent = sales.slice(0, 20);
+  const planLabels = { trial:'体验', week:'周卡', month:'月卡', quarter:'季卡', halfyear:'半年', year:'年卡', custom:'自定义' };
+  container.innerHTML = `<table>
+    <tr><th>时间</th><th>产品</th><th>客户</th><th>套餐</th><th>到期</th><th>激活码</th><th>分销人</th><th>佣金</th></tr>
+    ${recent.map(s => {
+      const dists = getDistributors();
+      const d = s.distId ? dists.find(x => x.id === s.distId) : null;
+      const distLabel = d ? d.name : '直接';
+      const pMeta = PRODUCT_META[s.product];
+      const planLabel = planLabels[s.plan] || s.plan;
+      const badgeClass = s.product === 'coach' ? 'badge-coach' : 'badge-hr';
+      return `<tr>
+        <td class="muted">${s.time}</td>
+        <td><span class="badge ${badgeClass}">${pMeta?pMeta.name:s.product}</span></td>
+        <td>${s.name}</td>
+        <td>${planLabel}</td>
+        <td class="muted">${s.expiry}</td>
+        <td class="batch-code" style="font-size:10px;cursor:pointer" title="${s.code||''}" onclick="navigator.clipboard.writeText('${(s.code||'').replace(/'/g,'\\\'')}').then(()=>showToast('已复制激活码'))">${s.code?s.code.substring(0,12)+'...':'-'}</td>
+        <td>${distLabel}</td>
+        <td class="text-green">${s.estCommission > 0 ? '¥'+s.estCommission.toFixed(2) : '-'}</td>
+      </tr>`;
+    }).join('')}
+  </table>`;
+  if (sales.length > 20) {
+    container.innerHTML += `<div class="muted" style="text-align:center;margin-top:12px">仅显示最近 20 条，共 ${sales.length} 条记录</div>`;
+  }
+}
+
+// ========== COMMISSION DASHBOARD ==========
+function renderDashboard() {
+  const filter = document.getElementById('dashFilter').value;
+  let sales = getSales();
+  if (filter !== 'all') sales = sales.filter(s => s.product === filter);
+
+  const dists = getDistributors();
+  const distMap = {};
+  dists.forEach(d => { distMap[d.id] = { name:d.name, rate:d.rate, count:0, revenue:0, commission:0 }; });
+
+  let totalRevenue = 0, totalCommission = 0, directCount = 0, directRevenue = 0;
+
+  sales.forEach(s => {
+    totalRevenue += s.estPrice || 0;
+    if (s.distId && distMap[s.distId]) {
+      distMap[s.distId].count++;
+      distMap[s.distId].revenue += s.estPrice || 0;
+      distMap[s.distId].commission += s.estCommission || 0;
+      totalCommission += s.estCommission || 0;
+    } else if (!s.distId) {
+      directCount++;
+      directRevenue += s.estPrice || 0;
+    }
+  });
+
+  document.getElementById('statCards').innerHTML = `
+    <div class="stat-card">
+      <div class="stat-num" style="color:#e0e0e0">${sales.length}</div>
+      <div class="stat-label">总订单</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" style="color:#07c160">¥${totalRevenue.toFixed(0)}</div>
+      <div class="stat-label">预估总营收</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" style="color:#ffa940">¥${totalCommission.toFixed(2)}</div>
+      <div class="stat-label">应付总佣金</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num">${directCount}</div>
+      <div class="stat-label">直接客户</div>
+    </div>
+  `;
+
+  const container = document.getElementById('dashTable');
+  const entries = Object.entries(distMap).filter(([_,v]) => v.count > 0);
+
+  if (entries.length === 0 && directCount === 0) {
+    container.innerHTML = '<div class="empty-state">暂无分销数据<br>生成激活码后这里会自动统计</div>';
+    return;
+  }
+
+  let html = `<table>
+    <tr><th>分销人</th><th>佣金率</th><th>订单</th><th>营收</th><th>应付佣金</th></tr>`;
+  entries.sort((a,b) => b[1].commission - a[1].commission);
+  entries.forEach(([_, v]) => {
+    html += `<tr>
+      <td style="font-weight:600">👤 ${v.name}</td>
+      <td>${v.rate}%</td>
+      <td><strong>${v.count}</strong></td>
+      <td>¥${v.revenue.toFixed(0)}</td>
+      <td style="color:#ffa940;font-weight:700">¥${v.commission.toFixed(2)}</td>
+    </tr>`;
+  });
+  if (directCount > 0) {
+    html += `<tr>
+      <td style="font-weight:600;color:rgba(255,255,255,.3)">🟢 直接客户</td>
+      <td>-</td><td>${directCount}</td><td>¥${directRevenue.toFixed(0)}</td><td>-</td>
+    </tr>`;
+  }
+  html += '</table>';
+  container.innerHTML = html;
+}
+
+function updateCommissionHint() {
+  const distId = document.getElementById('distributor').value;
+  const hint = document.getElementById('commissionHint');
+  if (!distId) { hint.style.display = 'none'; return; }
+  const dists = getDistributors();
+  const d = dists.find(x => x.id === distId);
+  if (!d) { hint.style.display = 'none'; return; }
+  const plan = document.getElementById('plan').value;
+  const estPrice = (PRICES[currentProduct] || {})[plan] || 0;
+  const estComm = estPrice * (d.rate / 100);
+  hint.style.display = 'block';
+  hint.innerHTML = `💰 ${d.name} 佣金 ${d.rate}%：售价 ¥${estPrice} → 应付 <strong style="color:#ffa940">¥${estComm.toFixed(2)}</strong>`;
+}
+
+// ========== CUSTOMER MANAGEMENT ==========
+function renderCustomers() {
+  const sales = getSales();
+  const container = document.getElementById('customerTable');
+  if (sales.length === 0) {
+    container.innerHTML = '<div class="empty-state">暂无客户数据</div>';
+    document.getElementById('customerSummary').textContent = '共 0 个客户，0 个在用激活码';
+    return;
+  }
+  const now = new Date();
+  let activeCount = 0, expiredCount = 0, oldCodeCount = 0;
+  const planLabels = { trial:'体验', week:'周卡', month:'月卡', quarter:'季卡', halfyear:'半年', year:'年卡', custom:'自定义' };
+  const rows = sales.slice(0, 50).map(s => {
+    const expiryDate = new Date(s.expiry + 'T23:59:59');
+    const isExpired = now > expiryDate;
+    const isOldCode = !s.blobId;
+    if (isExpired) expiredCount++; else activeCount++;
+    if (isOldCode) oldCodeCount++;
+    const pMeta = PRODUCT_META[s.product];
+    const badgeClass = s.product === 'coach' ? 'badge-coach' : 'badge-hr';
+    const statusBadge = isExpired
+      ? '<span class="badge" style="background:rgba(255,77,77,.1);color:#ff6b6b">已过期</span>'
+      : '<span class="badge" style="background:rgba(7,193,96,.1);color:#07c160">使用中</span>';
+    const oldTag = isOldCode
+      ? ' <span class="badge" style="background:rgba(255,193,7,.1);color:#ffc107">离线码</span>'
+      : '';
+    const renewalBtn = !isOldCode
+      ? `<button class="btn btn-outline btn-sm" onclick="renewCustomer('${s.id}')">续费</button>`
+      : `<button class="btn btn-outline btn-sm" onclick="showToast('旧版离线码无法远程续费，请重新生成')" style="opacity:.4">需重生成</button>`;
+    return `<tr>
+      <td><span class="badge ${badgeClass}">${pMeta?pMeta.name:s.product}</span></td>
+      <td style="font-weight:600">${s.name}</td>
+      <td class="muted">${planLabels[s.plan] || s.plan}</td>
+      <td class="muted">${s.expiry}</td>
+      <td>${s.uses === 0 ? '不限' : s.uses + '次'}</td>
+      <td>${statusBadge}${oldTag}</td>
+      <td>${renewalBtn}</td>
+    </tr>`;
+  }).join('');
+  container.innerHTML = `<table>
+    <tr><th>产品</th><th>客户</th><th>套餐</th><th>到期</th><th>次数</th><th>状态</th><th>操作</th></tr>
+    ${rows}
+  </table>`;
+  if (sales.length > 50) {
+    container.innerHTML += `<div class="muted" style="text-align:center;margin-top:12px">仅显示最近 50 条，共 ${sales.length} 条记录</div>`;
+  }
+  document.getElementById('customerSummary').textContent =
+    `共 ${sales.length} 个客户 · ${activeCount} 个使用中 · ${expiredCount} 个已过期` +
+    (oldCodeCount > 0 ? ` · ${oldCodeCount} 个离线码（需重新生成）` : '');
+}
+
+async function renewCustomer(saleId) {
+  const sales = getSales();
+  const s = sales.find(x => x.id === saleId);
+  if (!s || !s.blobId) { showToast('该码为旧版离线码，无法远程续费，请重新生成激活码'); return; }
+
+  const plan = prompt('续费套餐选择：\n\n1. 仅加次数（保持原到期日）\n2. 月卡续费（30天+50次）\n3. 季卡续费（90天+100次）\n4. 自定义\n\n输入编号（1-4）：', '1');
+  if (!plan) return;
+
+  let newDays = 0, newUses = 50;
+  const oldExpiry = new Date(s.expiry + 'T23:59:59');
+  const now2 = new Date();
+  const remainingDays = Math.max(0, Math.ceil((oldExpiry - now2) / 86400000));
+
+  switch (plan) {
+    case '1': newDays = remainingDays; newUses = parseInt(prompt('输入新增次数：', '50')) || 50; break;
+    case '2': newDays = Math.max(remainingDays, 0) + 30; newUses = 50; break;
+    case '3': newDays = Math.max(remainingDays, 0) + 90; newUses = 100; break;
+    case '4': newDays = parseInt(prompt('输入总天数（从今天起算）：', remainingDays + 30)) || (remainingDays + 30); newUses = parseInt(prompt('输入总次数：', '50')) || 50; break;
+    default: return;
+  }
+  if (isNaN(newDays) || newDays < 1) { showToast('天数无效'); return; }
+  if (isNaN(newUses) || newUses < 1) { showToast('次数无效'); return; }
+
+  // Reset jsonblob counter
+  try {
+    const getResp = await fetch(JSONBLOB_API + '/' + s.blobId);
+    if (getResp.ok) {
+      const blob = await getResp.json();
+      blob.totalUses = 0;
+      const headers = { 'Content-Type': 'application/json' };
+      const etag = getResp.headers.get('ETag') || getResp.headers.get('etag');
+      if (etag) headers['If-Match'] = etag;
+      await fetch(JSONBLOB_API + '/' + s.blobId, { method: 'PUT', headers, body: JSON.stringify(blob) });
+    }
+  } catch (e) { showToast('续费失败：网络不通（'+e.message+'）'); return; }
+
+  // Generate new activation code
+  const now = new Date();
+  const expiryDate = new Date(now.getTime() + newDays * 86400000);
+  const expiryStr = expiryDate.toISOString().slice(0, 10);
+  const randomId = Math.random().toString(36).substring(2, 6).toUpperCase();
+  const distId = s.distId || '';
+  const secret = SECRETS[s.product] || SECRETS.coach;
+  const distLabel = distId ? (getDistributors().find(d => d.id === distId) || {}).name || '分销' : '续费';
+
+  const payload = expiryStr + '|' + newUses + '|' + s.name + '|' + randomId + '|' + distId + '|' + s.blobId;
+  const encrypted = encrypt(payload, secret);
+  const hash = simpleHash(encrypted + secret).toString(16).slice(0, 4).toUpperCase();
+  const fullCode = encrypted + hash;
+  const formatted = fullCode.match(/.{1,4}/g).join('-');
+
+  // Save new sale record
+  saveSale(s.name, formatted, expiryStr, newUses, 'custom', distId, s.blobId);
+
+  // Show result prominently
+  const container = document.getElementById('customerTable');
+  container.innerHTML = `<div class="code-box" style="margin:16px 0">
+    <div class="code-label">续费客户：${s.name} · 新激活码</div>
+    <div class="code ${s.product === 'coach' ? 'coach-code' : 'hr-code'}">${formatted}</div>
+    <div class="code-info">到期日：${expiryStr} · 可用次数：${newUses}次 · 剩余天数：${newDays}天</div>
+    <div class="btn-row" style="justify-content:center;margin-top:12px">
+      <button class="btn btn-outline btn-sm" onclick="navigator.clipboard.writeText('${formatted.replace(/'/g, "\\'")}').then(()=>showToast('已复制激活码'))">📋 复制新码</button>
+      <button class="btn btn-outline btn-sm" onclick="renderCustomers()">返回客户列表</button>
+    </div>
+  </div>`;
+
+  showToast('✅ 续费成功！新激活码：' + formatted + '，发给客户重新激活即可');
+}
+
+// ========== EVENT LISTENERS ==========
+document.getElementById('plan').addEventListener('change', function() {
+  document.getElementById('customDaysBox').style.display = this.value === 'custom' ? 'block' : 'none';
+  const usesSelect = document.getElementById('uses');
+  if (this.value === 'trial') { usesSelect.value = '3'; usesSelect.disabled = true; }
+  else { usesSelect.disabled = false; }
+  updateCommissionHint();
+});
+document.getElementById('distributor').addEventListener('change', updateCommissionHint);
+
+// ========== UTILS ==========
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 1800);
+}
+</script>
+</body>
+</html>
