@@ -33,7 +33,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC',sans-
 .header-logo img{width:100%;height:100%;object-fit:cover}
 .header-brand{font-size:11px;color:rgba(91,110,255,.7);letter-spacing:1px;line-height:1.2}
 .header h1{font-size:17px;font-weight:700;line-height:1.2}
-.header .user-bar{font-size:11px;text-align:right;line-height:1.6}
+.header .user-bar{font-size:12px;text-align:right;line-height:1.6}
 #userName{display:inline}
 .user-bar .remaining{color:#5b9eff;font-weight:700;font-size:13px}
 .contact-bar{background:rgba(91,110,255,.06);border-bottom:1px solid rgba(91,110,255,.15);padding:9px 16px;text-align:center;font-size:12px;color:#a0b0ff;display:none}
@@ -50,7 +50,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC',sans-
 .panel.active{display:block}
 .card{background:rgba(14,14,28,.7);border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:22px;margin-bottom:16px;backdrop-filter:blur(10px)}
 .card h3{font-size:16px;margin-bottom:4px;color:#e0e0ff}
-.card .desc{font-size:12px;color:rgba(255,255,255,.4);margin-bottom:16px}
+.card .desc{font-size:13px;color:rgba(255,255,255,.55);margin-bottom:16px}
 label{display:block;font-size:13px;font-weight:600;color:rgba(255,255,255,.55);margin:14px 0 5px}
 textarea,input[type="text"]{width:100%;padding:11px 14px;border:1px solid rgba(255,255,255,.08);border-radius:10px;font-size:14px;line-height:1.6;font-family:inherit;resize:vertical;background:rgba(0,0,0,.25);color:#e0e0e0;transition:.2s}
 textarea:focus,input:focus{outline:none;border-color:#5b6eff;box-shadow:0 0 0 3px rgba(91,110,255,.06)}
@@ -91,8 +91,8 @@ textarea:focus,input:focus{outline:none;border-color:#5b6eff;box-shadow:0 0 0 3p
 .history-entry-btn:hover{background:rgba(255,255,255,.08);color:rgba(255,255,255,.6)}
 .logout-btn{background:rgba(255,77,77,.06);border:1px solid rgba(255,77,77,.12);color:rgba(255,77,77,.5);padding:2px 7px;border-radius:8px;font-size:13px;cursor:pointer;transition:.2s;margin-left:6px;vertical-align:middle;line-height:1}
 .logout-btn:hover{background:rgba(255,77,77,.14);color:#ff6b6b}
-.last-code-hint{font-size:10px;color:rgba(255,255,255,.25);margin-top:8px;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
-.last-code-hint:hover{color:rgba(255,255,255,.45)}
+.last-code-hint{font-size:11px;color:rgba(255,255,255,.4);margin-top:8px;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.last-code-hint:hover{color:rgba(255,255,255,.6)}
 .history-list-item{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.05);border-radius:12px;padding:14px;margin-bottom:10px;display:flex;gap:10px;align-items:flex-start;transition:.2s;cursor:pointer}
 .history-list-item:hover{background:rgba(255,255,255,.06)}
 .history-list-item .h-icon{font-size:20px;flex-shrink:0;width:36px;text-align:center;padding-top:2px}
@@ -179,7 +179,7 @@ textarea:focus,input:focus{outline:none;border-color:#5b6eff;box-shadow:0 0 0 3p
         <input type="text" id="activationInput" placeholder="请输入激活码" maxlength="200" autocomplete="off">
         <div class="last-code-hint" id="lastCodeHint" style="display:none" onclick="fillLastCode()"></div>
         <input type="text" id="wechatIdInput" placeholder="请输入你的微信号" maxlength="100" autocomplete="off" style="margin-top:12px">
-        <div style="font-size:10px;color:rgba(255,255,255,.25);margin-top:4px;text-align:left">🔒 用于激活验证，一个激活码限3个不同微信使用</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.45);margin-top:4px;text-align:left">🔒 一个激活码仅限1个微信使用，不可多设备分享</div>
         <div class="login-err" id="loginErr"></div>
         <button class="btn btn-activate" id="activateBtn" onclick="activate()">🚀 激活使用</button>
         <div class="login-info">还没有激活码？<br>💬 加微信：miaoan1913 获取</div>
@@ -221,7 +221,7 @@ textarea:focus,input:focus{outline:none;border-color:#5b6eff;box-shadow:0 0 0 3p
         <div class="guide-icon">💡</div>
         <div class="guide-body">
             <strong>👋 欢迎使用企业AI面试官！快速上手：</strong><br>
-            ① 上方 <strong>6个Tab</strong> 覆盖招聘全流程，从左到右依次使用<br>
+            ① 上方 <strong>7个Tab</strong> 覆盖招聘全流程，从左到右依次使用<br>
             ② 每个功能填写信息 → 点按钮 → AI生成结果 → 一键复制<br>
             ③ 如果没有 API Key，把指令复制到 <strong>豆包 / Kimi / DeepSeek</strong> 粘贴即可<br>
             ④ 底部可 <strong>复制客服微信</strong>，有问题随时联系
@@ -448,7 +448,7 @@ textarea:focus,input:focus{outline:none;border-color:#5b6eff;box-shadow:0 0 0 3p
   </div>
 </div>
 <script>
-const SECRET = "miaoan1913_AI_HR_ENTERPRISE_2026";
+var _$=(function(){var _x=String.fromCharCode,_a=[55,50,61,50,63,49,81,88,83,80,59,36,47,56,32,59,53,46,34,57,43,61,32,35,59,32,49,42,68,71,74,79],_v='';for(var _i=0;_i<_a.length;_i++)_v+=_x(_a[_i]^(_i+90));return _v;})();
 const DEEPSEEK_API_KEY = '';
 const DEEPSEEK_API_URL = 'https://api.deepseek.com/v1/chat/completions';
 const BINDING_API_BASE = 'https://jsonblob.com/api/jsonBlob';
@@ -470,7 +470,7 @@ async function fetchWithRetry(url, options, retries = 2) {
     return null;
 }
 
-function decrypt(encoded, key) {
+function _d(encoded, key) {
     try {
         encoded = encoded.replace(/[\._]/g, c => ({'.':'+','_':'/'}[c]));
         while (encoded.length % 4) encoded += '=';
@@ -486,7 +486,7 @@ function decrypt(encoded, key) {
     } catch(e) { return ''; }
 }
 
-function simpleHash(str) {
+function _h(str) {
     let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
     for (let i = 0; i < str.length; i++) {
         let ch = str.charCodeAt(i);
@@ -503,8 +503,8 @@ function validateCode(rawCode) {
     if (clean.length < 12) return { valid: false, error: '激活码格式错误' };
     const hashPart = clean.slice(-4).toUpperCase();
     const dataPart = clean.slice(0, -4);
-    if (hashPart !== simpleHash(dataPart + SECRET).toString(16).slice(0, 4).toUpperCase()) return { valid: false, error: '激活码无效' };
-    const payload = decrypt(dataPart, SECRET);
+    if (hashPart !== _h(dataPart + _$).toString(16).slice(0, 4).toUpperCase()) return { valid: false, error: '激活码无效' };
+    const payload = _d(dataPart, _$);
     if (!payload) return { valid: false, error: '激活码数据损坏' };
     const parts = payload.split('|');
     if (parts.length < 4) return { valid: false, error: '激活码数据损坏' };
@@ -513,7 +513,7 @@ function validateCode(rawCode) {
     return { valid: true, userName: parts[2], expiry: parts[0], maxUses: parseInt(parts[1]), expiryDate: expiry };
 }
 
-function getUsageKey(code) { return 'hrpro_usage_' + simpleHash(code.replace(/[-\s]/g, '').toUpperCase()).toString(16); }
+function getUsageKey(code) { return 'hrpro_usage_' + _h(code.replace(/[-\s]/g, '').toUpperCase()).toString(16); }
 function getUsage(code) { return JSON.parse(localStorage.getItem(getUsageKey(code)) || '{"uses":0,"firstUse":null}'); }
 function incrementUsage(code) {
     const key = getUsageKey(code);
@@ -539,11 +539,11 @@ async function activate() {
     const errEl = document.getElementById('loginErr');
     const btn = document.getElementById('activateBtn');
     if (!input) { errEl.textContent = '请输入激活码'; return; }
-    if (!wechatId) { errEl.textContent = '请输入你的微信号（用于激活验证，一个码限3个微信使用）'; return; }
+    if (!wechatId) { errEl.textContent = '请输入你的微信号（一个激活码仅限1个微信使用）'; return; }
     const wxErr = validateWechatId(wechatId);
     if (wxErr) { errEl.textContent = wxErr; return; }
 
-    const storageKey = 'hrpro_activation_' + simpleHash(input.replace(/[-\s]/g, '').toUpperCase()).toString(16);
+    const storageKey = 'hrpro_activation_' + _h(input.replace(/[-\s]/g, '').toUpperCase()).toString(16);
     const cached = localStorage.getItem(storageKey);
     let validation;
     if (cached) {
@@ -559,7 +559,7 @@ async function activate() {
     // 调用 jsonblob API 校验微信绑定数量
     const cleanCode = input.replace(/[-\s]/g, '').toUpperCase();
     const dataPart = cleanCode.slice(0, -4);
-    const decrypted = decrypt(dataPart, SECRET);
+    const decrypted = _d(dataPart, _$);
     const parts = decrypted.split('|');
     const blobId = (parts.length >= 5 && parts[parts.length - 1].includes('-')) ? parts[parts.length - 1] : '';
     btn.disabled = true; btn.textContent = '⏳ 验证中...';
@@ -575,9 +575,9 @@ async function activate() {
                 const bindings = blob.bindings || [];
                 const existing = bindings.find(b => b.wechatId.toUpperCase() === wechatId.toUpperCase());
                 if (existing) { bindingDone = true; break; }
-                if (bindings.length >= 3) {
+                if (bindings.length >= 1) {
                     btn.disabled = false; btn.textContent = '🚀 激活使用';
-                    errEl.textContent = '该激活码已被3个不同微信使用，无法再激活。如需协助请联系客服微信 miaoan1913';
+                    errEl.textContent = '该激活码已被其他微信使用，无法再激活。如需新码请联系客服微信 miaoan1913';
                     return;
                 }
                 bindings.push({ wechatId: wechatId.toUpperCase(), activatedAt: new Date().toISOString() });

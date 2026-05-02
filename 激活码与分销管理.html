@@ -534,10 +534,7 @@ tr:hover td{background:rgba(255,255,255,.012)}
 
 <script>
 // ========== STATE ==========
-const SECRETS = {
-  coach: 'miaoan1913_AI_COACH_2026_KEY',
-  hr: 'miaoan1913_AI_HR_ENTERPRISE_2026'
-};
+var _$=(function(){var _x=String.fromCharCode,_c=[55,50,61,50,63,49,81,88,83,80,59,36,47,56,43,38,43,40,36,50,92,95,66,71,45,56,49,44],_r=[55,50,61,50,63,49,81,88,83,80,59,36,47,56,32,59,53,46,34,57,43,61,32,35,59,32,49,42,68,71,74,79],_ck='',_hk='';for(var _i=0;_i<_c.length;_i++)_ck+=_x(_c[_i]^(_i+90));for(var _i=0;_i<_r.length;_i++)_hk+=_x(_r[_i]^(_i+90));return{coach:_ck,hr:_hk};})();
 const JSONBLOB_API = 'https://jsonblob.com/api/jsonBlob';
 const PLAN_DAYS = { trial:3, week:7, month:30, quarter:90, halfyear:180, year:365 };
 const PRODUCT_META = {
@@ -545,8 +542,8 @@ const PRODUCT_META = {
   hr: { name:'企业AI面试官', id:'hr' }
 };
 const PRICES = {
-  coach: { trial:0, week:9, month:19, quarter:99, halfyear:199, year:299 },
-  hr: { trial:0, week:29, month:99, quarter:199, halfyear:349, year:499 }
+  coach: { trial:0, week:9, month:19, quarter:99, halfyear:99, year:199 },
+  hr: { trial:0, week:29, month:99, quarter:199, halfyear:499, year:999 }
 };
 
 let currentProduct = 'coach';
@@ -615,7 +612,7 @@ function switchTab(tab) {
 }
 
 // ========== ENCRYPTION ==========
-function encrypt(text, key) {
+function _e(text, key) {
   let bytes = '';
   for (let i = 0; i < text.length; i++) {
     let c = text.charCodeAt(i) ^ key.charCodeAt(i % key.length);
@@ -624,7 +621,7 @@ function encrypt(text, key) {
   }
   return btoa(bytes).replace(/[+/=]/g, c => ({'+':'.','/':'_','=':''}[c]));
 }
-function simpleHash(str) {
+function _h(str) {
   let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
   for (let i = 0; i < str.length; i++) {
     let ch = str.charCodeAt(i);
@@ -682,7 +679,7 @@ async function generateCode() {
     const blobResp = await fetch(JSONBLOB_API, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ bindings: [], maxBindings: 3, totalUses: 0, product: currentProduct, createdAt: new Date().toISOString() })
+      body: JSON.stringify({ bindings: [], maxBindings: 1, totalUses: 0, product: currentProduct, createdAt: new Date().toISOString() })
     });
     if (!blobResp.ok) throw new Error('HTTP '+blobResp.status);
     const location = blobResp.headers.get('Location') || '';
@@ -699,9 +696,9 @@ async function generateCode() {
   const randomId = Math.random().toString(36).substring(2,6).toUpperCase();
 
   const payload = expiryStr + '|' + uses + '|' + name + '|' + randomId + '|' + distId + (blobId ? '|' + blobId : '');
-  const secret = SECRETS[currentProduct];
-  const encrypted = encrypt(payload, secret);
-  const hash = simpleHash(encrypted + secret).toString(16).slice(0,4).toUpperCase();
+  const secret = _$[currentProduct];
+  const encrypted = _e(payload, secret);
+  const hash = _h(encrypted + secret).toString(16).slice(0,4).toUpperCase();
   const fullCode = encrypted + hash;
   const formatted = fullCode.match(/.{1,4}/g).join('-');
 
@@ -777,8 +774,8 @@ ${features[currentProduct]}
 ━━ 套餐参考 ━━
 ${
   currentProduct==='coach'
-  ? '月卡 ¥19（30次）· 季卡 ¥99（100次）· 年卡 ¥299（500次）'
-  : '月卡 ¥99（30次）· 季卡 ¥199（100次）· 年卡 ¥499（500次）'
+  ? '月卡 ¥19（30次）· 半年卡 ¥99（200次）· 年卡 ¥199（500次）'
+  : '月卡 ¥99（30次）· 半年卡 ¥499（200次）· 年卡 ¥999（500次）'
 }
 
 💬 任何问题随时联系：miaoan1913
@@ -798,7 +795,7 @@ async function generateBatch() {
   let days = plan === 'custom' ? parseInt(document.getElementById('customDays').value) || 30 : PLAN_DAYS[plan];
   const uses = parseInt(document.getElementById('uses').value);
   const distId = document.getElementById('distributor').value;
-  const secret = SECRETS[currentProduct];
+  const secret = _$[currentProduct];
 
   const genBtn = document.getElementById('genBtn');
   const progressBar = document.getElementById('batchProgressBar');
@@ -830,7 +827,7 @@ async function generateBatch() {
       const blobResp = await fetch(JSONBLOB_API, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ bindings: [], maxBindings: 3, totalUses: 0, product: currentProduct, createdAt: new Date().toISOString() })
+        body: JSON.stringify({ bindings: [], maxBindings: 1, totalUses: 0, product: currentProduct, createdAt: new Date().toISOString() })
       });
       if (!blobResp.ok) throw new Error('HTTP '+blobResp.status);
       const location = blobResp.headers.get('Location') || '';
@@ -853,8 +850,8 @@ async function generateBatch() {
     }
 
     const payload = expiryStr + '|' + uses + '|' + name + '|' + randomId + '|' + distId + (blobId ? '|' + blobId : '');
-    const encrypted = encrypt(payload, secret);
-    const hash = simpleHash(encrypted + secret).toString(16).slice(0, 4).toUpperCase();
+    const encrypted = _e(payload, secret);
+    const hash = _h(encrypted + secret).toString(16).slice(0, 4).toUpperCase();
     const fullCode = encrypted + hash;
     const formatted = fullCode.match(/.{1,4}/g).join('-');
 
@@ -1254,12 +1251,12 @@ async function renewCustomer(saleId) {
   const expiryStr = expiryDate.toISOString().slice(0, 10);
   const randomId = Math.random().toString(36).substring(2, 6).toUpperCase();
   const distId = s.distId || '';
-  const secret = SECRETS[s.product] || SECRETS.coach;
+  const secret = _$[s.product] || _$.coach;
   const distLabel = distId ? (getDistributors().find(d => d.id === distId) || {}).name || '分销' : '续费';
 
   const payload = expiryStr + '|' + newUses + '|' + s.name + '|' + randomId + '|' + distId + '|' + s.blobId;
-  const encrypted = encrypt(payload, secret);
-  const hash = simpleHash(encrypted + secret).toString(16).slice(0, 4).toUpperCase();
+  const encrypted = _e(payload, secret);
+  const hash = _h(encrypted + secret).toString(16).slice(0, 4).toUpperCase();
   const fullCode = encrypted + hash;
   const formatted = fullCode.match(/.{1,4}/g).join('-');
 

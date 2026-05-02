@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI面试官 · 安迪AI调度师 — 产品介绍手册</title>
+<style>
+:root {
+  --bg: #0a0e1a; --card: #111827; --border: #1e293b;
+  --primary: #3b82f6; --primary-dark: #2563eb; --primary-light: #1e3a5f;
+  --accent: #8b5cf6; --accent-light: #2e1a5f;
+  --green: #07c160; --green-dark: #05a04f; --green-light: rgba(7,193,96,.1);
+  --blue: #5b6eff; --blue-dark: #4a4fcf; --blue-light: rgba(91,110,255,.1);
+  --success: #10b981; --success-light: #064e3b;
+  --warning: #f59e0b; --warning-light: #4a3000;
+  --text: #e2e8f0; --text2: #94a3b8; --text3: #64748b;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Helvetica Neue", sans-serif;
+  background: var(--bg); color: var(--text); line-height: 1.8;
+}
+
+/* Hero */
+.hero {
+  text-align: center; padding: 80px 24px 60px;
+  background: linear-gradient(175deg, #0a0e1a 0%, #0f172a 40%, #1a1a3a 100%);
+  position: relative; overflow: hidden;
+}
+.hero::before {
+  content:''; position:absolute; top:0; left:0; width:100%; height:100%;
+  background: radial-gradient(ellipse 60% 50% at 50% 0%, rgba(59,130,246,.08) 0%, transparent 60%),
+              radial-gradient(ellipse 40% 40% at 80% 80%, rgba(7,193,96,.05) 0%, transparent 55%);
+  pointer-events:none;
+}
+.hero-badge {
+  display:inline-block; padding:6px 18px; border:1px solid rgba(59,130,246,.25);
+  border-radius:20px; font-size:12px; color:#60a5fa; letter-spacing:2px; margin-bottom:20px;
+  background:rgba(59,130,246,.06);
+}
+.hero h1 { font-size:clamp(28px,5vw,46px); font-weight:800; letter-spacing:1px; margin-bottom:8px; }
+.hero h1 span { background:linear-gradient(135deg,#60a5fa,#07c160); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+.hero .subtitle { font-size:18px; color:var(--text2); margin-bottom:12px; }
+.hero .desc { font-size:14px; color:var(--text3); max-width:600px; margin:0 auto 32px; }
+.hero .cta-row { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+.btn-primary {
+  display:inline-block; padding:14px 36px; background:linear-gradient(135deg,#3b82f6,#2563eb);
+  color:#fff; border-radius:12px; font-size:16px; font-weight:600; text-decoration:none;
+  transition:.2s; border:none; cursor:pointer; letter-spacing:.5px;
+  box-shadow:0 4px 24px rgba(59,130,246,.25);
+}
+.btn-primary:hover { transform:translateY(-2px); box-shadow:0 8px 32px rgba(59,130,246,.35); }
+.btn-green {
+  display:inline-block; padding:14px 36px; background:linear-gradient(135deg,#07c160,#05a04f);
+  color:#fff; border-radius:12px; font-size:16px; font-weight:600; text-decoration:none;
+  transition:.2s; border:none; cursor:pointer; letter-spacing:.5px;
+  box-shadow:0 4px 24px rgba(7,193,96,.25);
+}
+.btn-green:hover { transform:translateY(-2px); box-shadow:0 8px 32px rgba(7,193,96,.35); }
+.btn-blue {
+  display:inline-block; padding:14px 36px; background:linear-gradient(135deg,#5b6eff,#4a4fcf);
+  color:#fff; border-radius:12px; font-size:16px; font-weight:600; text-decoration:none;
+  transition:.2s; border:none; cursor:pointer; letter-spacing:.5px;
+  box-shadow:0 4px 24px rgba(91,110,255,.25);
+}
+.btn-blue:hover { transform:translateY(-2px); box-shadow:0 8px 32px rgba(91,110,255,.35); }
+.btn-outline {
+  display:inline-block; padding:14px 36px; border:1px solid rgba(59,130,246,.25);
+  color:#60a5fa; border-radius:12px; font-size:16px; font-weight:600; text-decoration:none;
+  transition:.2s; cursor:pointer;
+}
+.btn-outline:hover { background:rgba(59,130,246,.08); border-color:rgba(59,130,246,.4); }
+
+/* Product Switch Tabs */
+.product-tabs {
+  display:flex; gap:4px; justify-content:center; margin-bottom:0;
+  background:rgba(255,255,255,.025); border-radius:14px; padding:5px;
+  border:1px solid rgba(255,255,255,.04);
+  max-width:400px; margin-left:auto; margin-right:auto;
+}
+.product-tab {
+  flex:1; padding:12px 24px; border:none; border-radius:10px;
+  font-size:14px; font-weight:600; cursor:pointer; transition:.2s;
+  background:transparent; color:rgba(255,255,255,.38);
+}
+.product-tab:hover { color:rgba(255,255,255,.6); }
+.product-tab.active { color:#fff; }
+.product-tab.green.active { background:#07c160; box-shadow:0 2px 16px rgba(7,193,96,.25); }
+.product-tab.blue.active { background:#5b6eff; box-shadow:0 2px 16px rgba(91,110,255,.25); }
+
+/* Sections */
+.container { max-width:960px; margin:0 auto; padding:0 24px; }
+.section { padding:72px 0; }
+.section-dark { background:rgba(17,24,39,.5); border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
+.section-label {
+  display:inline-block; padding:4px 14px; border-radius:20px; font-size:11px; font-weight:600;
+  letter-spacing:1.5px; margin-bottom:16px; text-transform:uppercase;
+  background:rgba(59,130,246,.1); color:#60a5fa; border:1px solid rgba(59,130,246,.15);
+}
+.section-label.green { background:var(--green-light); color:#07c160; border:1px solid rgba(7,193,96,.15); }
+.section-label.blue { background:var(--blue-light); color:#5b6eff; border:1px solid rgba(91,110,255,.15); }
+.section h2 { font-size:30px; font-weight:700; margin-bottom:8px; }
+.section h3 { font-size:20px; font-weight:600; margin:24px 0 12px; color:#f1f5f9; }
+.section .lead { font-size:16px; color:var(--text2); margin-bottom:32px; }
+
+/* Value cards */
+.value-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:16px; }
+.value-card {
+  background:var(--card); border:1px solid var(--border); border-radius:14px; padding:24px;
+  transition:.2s;
+}
+.value-card:hover { border-color:rgba(59,130,246,.25); }
+.value-card .icon { font-size:28px; margin-bottom:10px; }
+.value-card h4 { font-size:16px; margin-bottom:6px; color:#f1f5f9; }
+.value-card p { font-size:13px; color:var(--text2); line-height:1.7; }
+
+/* Module cards */
+.module-grid { display:grid; gap:12px; }
+.module-card {
+  background:var(--card); border:1px solid var(--border); border-radius:14px; padding:20px 24px;
+  display:flex; gap:16px; align-items:flex-start; transition:.2s;
+}
+.module-card:hover { border-color:rgba(59,130,246,.2); background:rgba(30,58,95,.15); }
+.module-card.green:hover { border-color:rgba(7,193,96,.2); background:rgba(7,193,96,.06); }
+.module-card.blue:hover { border-color:rgba(91,110,255,.2); background:rgba(91,110,255,.06); }
+.module-card .m-icon { font-size:32px; flex-shrink:0; width:48px; text-align:center; }
+.module-card .m-info { flex:1; }
+.module-card .m-info h4 { font-size:16px; margin-bottom:4px; }
+.module-card .m-info p { font-size:13px; color:var(--text2); }
+.module-card .m-tag {
+  display:inline-block; padding:2px 10px; background:rgba(59,130,246,.1);
+  border-radius:10px; font-size:11px; color:#60a5fa; margin-top:6px;
+}
+.module-card .m-tag.green-tag { background:rgba(7,193,96,.1); color:#07c160; }
+.module-card .m-tag.blue-tag { background:rgba(91,110,255,.1); color:#5b6eff; }
+
+/* How it works */
+.steps { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; }
+.step {
+  text-align:center; padding:32px 20px; background:var(--card); border:1px solid var(--border);
+  border-radius:14px; position:relative;
+}
+.step-num {
+  width:44px; height:44px; border-radius:50%; background:linear-gradient(135deg,#3b82f6,#2563eb);
+  display:flex; align-items:center; justify-content:center; font-size:20px; font-weight:700;
+  margin:0 auto 14px; box-shadow:0 4px 16px rgba(59,130,246,.3);
+}
+.step h4 { font-size:16px; margin-bottom:6px; }
+.step p { font-size:13px; color:var(--text2); }
+.step-arrow { position:absolute; right:-20px; top:50%; transform:translateY(-50%); font-size:24px; color:var(--primary); }
+@media(max-width:768px) { .steps { grid-template-columns:1fr; } .step-arrow { display:none; } }
+
+/* Pricing */
+.pricing-section-title { text-align:center; margin-bottom:32px; }
+.pricing-section-title h3 { font-size:22px; margin-bottom:4px; }
+.pricing-section-title .sub { font-size:13px; color:var(--text3); }
+.pricing-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
+.price-card {
+  background:var(--card); border:2px solid var(--border); border-radius:16px; padding:28px 20px;
+  text-align:center; transition:.2s; position:relative;
+}
+.price-card.featured { border-color:#07c160; background:rgba(7,193,96,.04); }
+.price-card.featured2 { border-color:#5b6eff; background:rgba(91,110,255,.04); }
+.price-card.featured::before {
+  content:'最受欢迎'; position:absolute; top:-12px; left:50%; transform:translateX(-50%);
+  background:linear-gradient(135deg,#07c160,#05a04f); color:#fff; padding:4px 20px;
+  border-radius:12px; font-size:12px; font-weight:600;
+}
+.price-card.featured2::before {
+  content:'企业推荐'; position:absolute; top:-12px; left:50%; transform:translateX(-50%);
+  background:linear-gradient(135deg,#5b6eff,#4a4fcf); color:#fff; padding:4px 20px;
+  border-radius:12px; font-size:12px; font-weight:600;
+}
+.price-card .plan-name { font-size:13px; color:var(--text3); letter-spacing:1px; margin-bottom:4px; }
+.price-card .price { font-size:36px; font-weight:800; color:#f1f5f9; }
+.price-card .price span { font-size:14px; color:var(--text2); font-weight:400; }
+.price-card .price-original { font-size:13px; color:var(--text3); text-decoration:line-through; margin-bottom:12px; }
+.price-card .plan-features { list-style:none; text-align:left; margin:16px 0; }
+.price-card .plan-features li { font-size:12px; padding:5px 0; border-bottom:1px solid rgba(255,255,255,.04); color:var(--text2); }
+.price-card .plan-features li::before { content:'✓ '; color:var(--success); font-weight:700; margin-right:4px; }
+.price-card .btn-buy {
+  display:block; width:100%; padding:10px; border-radius:10px; font-size:14px; font-weight:600;
+  cursor:pointer; transition:.2s; border:none; text-align:center; text-decoration:none;
+}
+.price-card .btn-buy.green { background:linear-gradient(135deg,#07c160,#05a04f); color:#fff; }
+.price-card .btn-buy.green:hover { transform:translateY(-1px); box-shadow:0 6px 24px rgba(7,193,96,.3); }
+.price-card .btn-buy.blue { background:linear-gradient(135deg,#5b6eff,#4a4fcf); color:#fff; }
+.price-card .btn-buy.blue:hover { transform:translateY(-1px); box-shadow:0 6px 24px rgba(91,110,255,.3); }
+.price-card .btn-buy.outline { background:transparent; border:1px solid rgba(59,130,246,.2); color:#60a5fa; }
+.price-card .btn-buy.outline:hover { background:rgba(59,130,246,.06); }
+@media(max-width:900px) { .pricing-grid { grid-template-columns:repeat(2,1fr); } }
+@media(max-width:600px) { .pricing-grid { grid-template-columns:1fr; max-width:320px; margin:0 auto; } }
+
+/* Notice bar */
+.notice-bar {
+  text-align:center; margin-top:20px; padding:14px 20px;
+  background:rgba(255,193,7,.04); border:1px solid rgba(255,193,7,.12);
+  border-radius:12px; font-size:12px; color:var(--text3); line-height:1.8;
+}
+.notice-bar strong { color:#ffc107; }
+
+/* Comparison table */
+.compare-table { width:100%; border-collapse:collapse; font-size:13px; }
+.compare-table th { text-align:left; padding:12px 16px; background:rgba(17,24,39,.8); color:var(--text2); font-weight:600; border-bottom:2px solid var(--border); font-size:11px; text-transform:uppercase; letter-spacing:.5px; }
+.compare-table td { padding:12px 16px; border-bottom:1px solid var(--border); color:var(--text2); }
+.compare-table tr:hover td { background:rgba(59,130,246,.03); }
+.compare-table .check { color:var(--success); font-weight:700; }
+.compare-table .cross { color:#ef4444; }
+.compare-table .highlight { color:#60a5fa; font-weight:600; }
+
+/* FAQ */
+.faq-item { border-bottom:1px solid var(--border); }
+.faq-q {
+  padding:18px 0; font-size:16px; font-weight:600; cursor:pointer;
+  display:flex; justify-content:space-between; align-items:center;
+}
+.faq-q::after { content:'+'; font-size:22px; color:var(--primary); }
+.faq-a { padding:0 0 18px; font-size:14px; color:var(--text2); display:none; }
+.faq-item.open .faq-a { display:block; }
+.faq-item.open .faq-q::after { content:'−'; }
+
+/* Footer CTA */
+.cta-section {
+  text-align:center; padding:72px 24px;
+  background:linear-gradient(175deg, #0f172a 0%, #1a1a3a 100%);
+  border-top:1px solid var(--border);
+}
+.cta-section h2 { font-size:28px; margin-bottom:12px; }
+.cta-section p { font-size:14px; color:var(--text2); margin-bottom:28px; max-width:560px; margin-left:auto; margin-right:auto; }
+.cta-section .cta-row { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+.contact-info { font-size:12px; color:var(--text3); margin-top:20px; }
+
+/* Footer */
+.footer { text-align:center; padding:24px; font-size:11px; color:var(--text3); border-top:1px solid rgba(255,255,255,.04); }
+
+/* Two-column layout */
+.two-col { display:grid; grid-template-columns:1fr 1fr; gap:24px; }
+.two-col-title { text-align:center; margin-bottom:24px; font-size:18px; font-weight:700; }
+.two-col-title.green { color:#07c160; }
+.two-col-title.blue { color:#5b6eff; }
+@media(max-width:768px) { .two-col { grid-template-columns:1fr; } }
+
+/* Panel show/hide */
+.product-panel { display:none; }
+.product-panel.show { display:block; }
+
+@media(max-width:640px) {
+  .hero { padding:48px 16px 40px; }
+  .section { padding:48px 0; }
+  .section h2 { font-size:24px; }
+  .module-card { flex-direction:column; }
+}
+
+/* Toast */
+.toast {
+  position:fixed; top:24px; left:50%; transform:translateX(-50%);
+  background:rgba(7,193,96,.95); color:#fff; padding:12px 26px; border-radius:24px;
+  font-size:14px; z-index:999; opacity:0; transition:.3s; pointer-events:none;
+  white-space:nowrap; box-shadow:0 8px 32px rgba(7,193,96,.3);
+}
+.toast.show { opacity:1; }
+.toast.blue-toast { background:rgba(91,110,255,.95); box-shadow:0 8px 32px rgba(91,110,255,.3); }
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     HERO
+     ============================================================ -->
+<section class="hero">
+  <div class="hero-badge">AI × 招聘面试</div>
+  <h1>AI<span>面试官</span></h1>
+  <p class="subtitle">专业AI面试解决方案</p>
+  <p class="desc">候选人端（5大模块）：简历优化 · 简历生成 · 模拟面试 · 谈薪指导 · 试用期护航<br>HR端（7大模块）：JD优化 · 简历筛选 · 面试题库 · 面试分析 · 谈薪策略 · 试用期管理 · 候选人追踪</p>
+
+  <!-- Product Switch -->
+  <div class="product-tabs">
+    <button class="product-tab green active" id="tabCandidate" onclick="switchProduct('candidate')">🎯 候选人端</button>
+    <button class="product-tab blue" id="tabHR" onclick="switchProduct('hr')">🏢 HR端</button>
+  </div>
+  <div style="margin-top:28px;" class="cta-row">
+    <a href="#pricing-candidate" class="btn-green" id="heroBtnCandidate">候选人套餐 →</a>
+    <a href="#pricing-hr" class="btn-blue" id="heroBtnHR" style="display:none;">HR套餐 →</a>
+    <a href="#how-it-works" class="btn-outline">怎么用？</a>
+  </div>
+</section>
+
+<!-- ============================================================
+     产品概述
+     ============================================================ -->
+<section class="section">
+  <div class="container">
+    <div class="section-label">产品概述</div>
+    <h2>什么是AI面试官？</h2>
+    <p class="lead">一套覆盖面试全流程的AI工具系统。候选人端帮你准备面试、优化简历、拿到Offer；HR端帮你筛选简历、设计面试题、评估候选人。只需填写信息，AI自动生成专业结果。</p>
+
+    <div class="value-grid">
+      <div class="value-card">
+        <div class="icon">💡</div>
+        <h4>AI深度融合</h4>
+        <p>不是简单的问答机器人。系统整合你的完整信息，生成结构化、专业级的分析和指导，可直接用于真实面试场景。</p>
+      </div>
+      <div class="value-card">
+        <div class="icon">⚡</div>
+        <h4>即时可用</h4>
+        <p>不用预约、不用排队、不用等顾问回复。随时打开网页，填写信息，即时生成结果。</p>
+      </div>
+      <div class="value-card">
+        <div class="icon">🎯</div>
+        <h4>双端覆盖</h4>
+        <p>候选人端 + HR端，覆盖招聘面试全流程。求职者准备面试，HR优化招聘，一套系统两端受益。</p>
+      </div>
+      <div class="value-card">
+        <div class="icon">💰</div>
+        <h4>极低成本</h4>
+        <p>候选人版仅¥19/月起，HR版仅¥99/月起。相比传统面试辅导（¥500-2000/次）或招聘外包（¥5000+/岗位），成本降低90%以上。</p>
+      </div>
+      <div class="value-card">
+        <div class="icon">🔒</div>
+        <h4>一码一用 · 数据自有</h4>
+        <p>一个激活码仅限1个微信使用，杜绝分享和倒卖。所有数据仅存储在本地浏览器和你的云端同步中，不上传任何第三方服务器。</p>
+      </div>
+      <div class="value-card">
+        <div class="icon">🔄</div>
+        <h4>覆盖全流程</h4>
+        <p>候选人端5大模块 + HR端7大模块，从简历准备到试用期管理，从JD撰写到候选人追踪，招聘面试的每个关键节点都有对应工具支持。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     候选人端 — 功能模块
+     ============================================================ -->
+<section class="section section-dark" id="features-candidate">
+  <div class="container">
+    <div class="section-label green">候选人端</div>
+    <h2>AI面试辅导 · 五大功能模块</h2>
+    <p class="lead">从简历到入职，系统化帮你拿到心仪Offer。</p>
+
+    <div class="module-grid">
+
+      <div class="module-card green">
+        <div class="m-icon">📝</div>
+        <div class="m-info">
+          <h4>简历优化</h4>
+          <p>诊断现有简历问题 → 逐段改写优化 → STAR法则重构 → 匹配度分析。AI帮你把普通简历变成面试官眼中的高分简历。</p>
+          <span class="m-tag green-tag">核心功能</span>
+        </div>
+      </div>
+
+      <div class="module-card green">
+        <div class="m-icon">📄</div>
+        <div class="m-info">
+          <h4>简历生成</h4>
+          <p>填写基本信息 → AI自动生成完整简历。STAR法则 + 数据化表达 + 结果导向，生成的简历可直接投递。</p>
+          <span class="m-tag green-tag">从零到一</span>
+        </div>
+      </div>
+
+      <div class="module-card green">
+        <div class="m-icon">🎤</div>
+        <div class="m-info">
+          <h4>模拟面试</h4>
+          <p>选择目标岗位 → AI生成针对性面试题 → 逐题追问 → 即时点评你的回答 → 给出完整面试评估报告。支持行为面试、技术面试、案例面试等多种类型。</p>
+          <span class="m-tag green-tag">杀手功能</span>
+        </div>
+      </div>
+
+      <div class="module-card green">
+        <div class="m-icon">💵</div>
+        <div class="m-info">
+          <h4>谈薪指导</h4>
+          <p>输入期望薪资和岗位信息 → AI生成三套谈判方案（保守/均衡/激进）→ 每轮话术准备 → 常见陷阱应对策略。让你谈薪不怯场。</p>
+          <span class="m-tag green-tag">薪资谈判</span>
+        </div>
+      </div>
+
+      <div class="module-card green">
+        <div class="m-icon">🛡️</div>
+        <div class="m-info">
+          <h4>试用期护航</h4>
+          <p>入职前30天/60天/90天三阶段融入计划 → 风险预警 → 汇报话术 → 人际关系建议。帮你安全度过试用期的关键窗口。</p>
+          <span class="m-tag green-tag">入职保障</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     HR端 — 功能模块
+     ============================================================ -->
+<section class="section" id="features-hr">
+  <div class="container">
+    <div class="section-label blue">HR端</div>
+    <h2>企业AI面试官 · 七大功能模块</h2>
+    <p class="lead">从JD到入职，系统化提升招聘效率和质量。</p>
+
+    <div class="module-grid">
+
+      <div class="module-card blue">
+        <div class="m-icon">📋</div>
+        <div class="m-info">
+          <h4>JD优化</h4>
+          <p>输入原始JD → AI诊断问题（模糊描述/歧视风险/缺失要素）→ 逐项改写 → 自动生成配套面试题。让JD更专业、更吸引人。</p>
+          <span class="m-tag blue-tag">核心功能</span>
+        </div>
+      </div>
+
+      <div class="module-card blue">
+        <div class="m-icon">🔎</div>
+        <div class="m-info">
+          <h4>简历筛选</h4>
+          <p>粘贴JD + 候选人简历 → AI自动匹配度评分（0-100分）→ 风险标注（频繁跳槽/经历空白/技能不符）→ 面试建议。2倍效率提升。</p>
+          <span class="m-tag blue-tag">效率利器</span>
+        </div>
+      </div>
+
+      <div class="module-card blue">
+        <div class="m-icon">📚</div>
+        <div class="m-info">
+          <h4>面试题库</h4>
+          <p>输入岗位信息 → AI分层出题（基础/进阶/高阶）→ 追问设计 → 评分标准 → 期望答案要点。结构化面试不再靠感觉。</p>
+          <span class="m-tag blue-tag">标准化</span>
+        </div>
+      </div>
+
+      <div class="module-card blue">
+        <div class="m-icon">📊</div>
+        <div class="m-info">
+          <h4>面试分析</h4>
+          <p>记录面试问答内容 → AI逐题评估 → STAR完整度分析 → 能力维度评分 → 录用风险提示 → 综合建议。让每个录用决策有据可依。</p>
+          <span class="m-tag blue-tag">决策支持</span>
+        </div>
+      </div>
+
+      <div class="module-card blue">
+        <div class="m-icon">💵</div>
+        <div class="m-info">
+          <h4>谈薪策略</h4>
+          <p>HR视角的薪资谈判工具 → 三轮谈判方案 → 候选人心理分析 → 促成话术。在控制成本的同时提高入职率。</p>
+          <span class="m-tag blue-tag">薪资谈判</span>
+        </div>
+      </div>
+
+      <div class="module-card blue">
+        <div class="m-icon">🛡️</div>
+        <div class="m-info">
+          <h4>试用期管理</h4>
+          <p>新员工90天落地计划 → 阶段目标设定 → 风险诊断 → 主管辅导话术。降低试用期流失率。</p>
+          <span class="m-tag blue-tag">留存保障</span>
+        </div>
+      </div>
+
+      <div class="module-card blue">
+        <div class="m-icon">📌</div>
+        <div class="m-info">
+          <h4>候选人追踪看板</h4>
+          <p>拖拽式看板管理 → 待筛选/面试中/谈薪/试用期/已录用五阶段 → 卡片拖拽移动。招聘进度一目了然，不再遗漏候选人。</p>
+          <span class="m-tag blue-tag">流程管理</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     使用流程
+     ============================================================ -->
+<section class="section section-dark" id="how-it-works">
+  <div class="container">
+    <div class="section-label">使用流程</div>
+    <h2>三步上手，简单直接</h2>
+    <p class="lead">不需要下载APP，不需要安装软件。一个网页，三步完成。</p>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <h4>选择功能，填写信息</h4>
+        <p>选择你需要的能力模块（简历/面试/谈薪等），填写相关背景信息</p>
+        <span class="step-arrow">→</span>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <h4>AI生成结果</h4>
+        <p>系统整合你的数据，AI自动生成专业的分析报告、面试题、优化建议等</p>
+        <span class="step-arrow">→</span>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <h4>一键复制使用</h4>
+        <p>复制结果直接用，也可以把指令复制到 DeepSeek / Kimi / 豆包等AI工具中获取分析</p>
+      </div>
+    </div>
+
+    <div style="text-align:center;margin-top:36px;padding:20px;background:var(--card);border:1px solid var(--border);border-radius:14px;">
+      <p style="font-size:14px;color:var(--text2);">
+        <strong style="color:#60a5fa;">📌 双模式使用：</strong>
+        内置AI直接生成结果 &nbsp;|&nbsp; 复制指令到 DeepSeek · Kimi · 豆包 · 通义千问 · ChatGPT · Claude 等任意AI工具
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     套餐定价 — 候选人端
+     ============================================================ -->
+<section class="section" id="pricing-candidate">
+  <div class="container">
+    <div class="section-label green">候选人端 · 定价</div>
+    <h2>AI面试辅导 套餐方案</h2>
+    <p class="lead">四个档位，按需选择。所有套餐均包含全部5个功能模块的无限制使用。</p>
+
+    <div class="pricing-grid">
+
+      <!-- 体验卡 -->
+      <div class="price-card">
+        <div class="plan-name">体验卡</div>
+        <div class="price">免费</div>
+        <div class="price-original">3天 · 限3次</div>
+        <ul class="plan-features">
+          <li>3天有效期</li>
+          <li>3次使用次数</li>
+          <li>全部5个模块开放</li>
+          <li>支持任意AI模型</li>
+          <li>本地数据存储</li>
+        </ul>
+        <a class="btn-buy outline" href="#" onclick="buyPlan('candidate','体验卡','免费','3天·限3次')">免费体验</a>
+      </div>
+
+      <!-- 月卡 -->
+      <div class="price-card">
+        <div class="plan-name">月卡</div>
+        <div class="price">¥19<span>/月</span></div>
+        <div class="price-original">约¥0.63/次</div>
+        <ul class="plan-features">
+          <li>30天有效期</li>
+          <li>30次使用次数</li>
+          <li>全部5个模块开放</li>
+          <li>支持任意AI模型</li>
+          <li>本地数据存储</li>
+          <li>客服微信支持</li>
+        </ul>
+        <a class="btn-buy green" href="#" onclick="buyPlan('candidate','月卡','¥19','30天·30次')">立即购买</a>
+      </div>
+
+      <!-- 半年卡 -->
+      <div class="price-card featured">
+        <div class="plan-name">半年卡</div>
+        <div class="price">¥99<span>/半年</span></div>
+        <div class="price-original">约¥0.50/次</div>
+        <ul class="plan-features">
+          <li>180天有效期</li>
+          <li>200次使用次数</li>
+          <li>全部5个模块开放</li>
+          <li>支持任意AI模型</li>
+          <li>本地数据存储</li>
+          <li>客服微信优先响应</li>
+        </ul>
+        <a class="btn-buy green" href="#" onclick="buyPlan('candidate','半年卡','¥99','180天·200次')">立即购买</a>
+      </div>
+
+      <!-- 年卡 -->
+      <div class="price-card">
+        <div class="plan-name">年卡</div>
+        <div class="price">¥199<span>/年</span></div>
+        <div class="price-original">约¥0.40/次</div>
+        <ul class="plan-features">
+          <li>365天有效期</li>
+          <li>500次使用次数</li>
+          <li>全部5个模块开放</li>
+          <li>支持任意AI模型</li>
+          <li>本地数据存储</li>
+          <li>客服微信优先响应</li>
+          <li>云端同步（可选）</li>
+        </ul>
+        <a class="btn-buy outline" href="#" onclick="buyPlan('candidate','年卡','¥199','365天·500次')">立即购买</a>
+      </div>
+
+    </div>
+    <p class="notice-bar">
+      🎁 <strong>推荐半年卡：</strong>180天覆盖一次完整的"简历准备→面试→谈薪→入职"周期，最受欢迎的选择<br>
+      所有套餐购买后激活码即时生成，激活后开始计费
+    </p>
+  </div>
+</section>
+
+<!-- ============================================================
+     套餐定价 — HR端
+     ============================================================ -->
+<section class="section section-dark" id="pricing-hr">
+  <div class="container">
+    <div class="section-label blue">HR端 · 定价</div>
+    <h2>企业AI面试官 套餐方案</h2>
+    <p class="lead">四个档位，按需选择。所有套餐均包含全部6个功能模块的无限制使用。</p>
+
+    <div class="pricing-grid">
+
+      <!-- 体验卡 -->
+      <div class="price-card">
+        <div class="plan-name">体验卡</div>
+        <div class="price">免费</div>
+        <div class="price-original">3天 · 限3次</div>
+        <ul class="plan-features">
+          <li>3天有效期</li>
+          <li>3次使用次数</li>
+          <li>全部7个模块开放</li>
+          <li>支持任意AI模型</li>
+          <li>本地数据存储</li>
+        </ul>
+        <a class="btn-buy outline" href="#" onclick="buyPlan('hr','体验卡','免费','3天·限3次')">免费体验</a>
+      </div>
+
+      <!-- 月卡 -->
+      <div class="price-card">
+        <div class="plan-name">月卡</div>
+        <div class="price">¥99<span>/月</span></div>
+        <div class="price-original">约¥3.3/次</div>
+        <ul class="plan-features">
+          <li>30天有效期</li>
+          <li>30次使用次数</li>
+          <li>全部7个模块开放</li>
+          <li>支持任意AI模型</li>
+          <li>本地数据存储</li>
+          <li>客服微信支持</li>
+        </ul>
+        <a class="btn-buy blue" href="#" onclick="buyPlan('hr','月卡','¥99','30天·30次')">立即购买</a>
+      </div>
+
+      <!-- 半年卡 -->
+      <div class="price-card featured2">
+        <div class="plan-name">半年卡</div>
+        <div class="price">¥499<span>/半年</span></div>
+        <div class="price-original">约¥2.5/次</div>
+        <ul class="plan-features">
+          <li>180天有效期</li>
+          <li>200次使用次数</li>
+          <li>全部7个模块开放</li>
+          <li>支持任意AI模型</li>
+          <li>本地数据存储</li>
+          <li>客服微信优先响应</li>
+        </ul>
+        <a class="btn-buy blue" href="#" onclick="buyPlan('hr','半年卡','¥499','180天·200次')">立即购买</a>
+      </div>
+
+      <!-- 年卡 -->
+      <div class="price-card">
+        <div class="plan-name">年卡</div>
+        <div class="price">¥999<span>/年</span></div>
+        <div class="price-original">约¥2.0/次</div>
+        <ul class="plan-features">
+          <li>365天有效期</li>
+          <li>500次使用次数</li>
+          <li>全部7个模块开放</li>
+          <li>支持任意AI模型</li>
+          <li>本地数据存储</li>
+          <li>客服微信优先响应</li>
+          <li>云端同步（可选）</li>
+        </ul>
+        <a class="btn-buy outline" href="#" onclick="buyPlan('hr','年卡','¥999','365天·500次')">立即购买</a>
+      </div>
+
+    </div>
+    <p class="notice-bar">
+      🏢 <strong>企业推荐半年卡：</strong>覆盖一个完整招聘季，200次用量满足中小型企业的日常招聘需求<br>
+      如需批量采购（如高校就业办、大型企业），请联系客服微信获取团购优惠
+    </p>
+  </div>
+</section>
+
+<!-- ============================================================
+     对比表
+     ============================================================ -->
+<section class="section">
+  <div class="container">
+    <div class="section-label">为什么选择我们</div>
+    <h2>AI面试官 vs 传统方式</h2>
+    <p class="lead">同样的面试场景，完全不同的效率和成本。</p>
+
+    <div style="overflow-x:auto;">
+    <table class="compare-table">
+      <thead>
+        <tr>
+          <th>对比维度</th>
+          <th>传统面试辅导 / 招聘外包</th>
+          <th style="color:#60a5fa;">AI面试官</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>单次面试辅导</td><td>¥500 – 2,000</td><td class="highlight">候选人版约¥0.63/次</td></tr>
+        <tr><td>单岗位招聘外包</td><td>¥5,000 – 20,000</td><td class="highlight">HR版约¥3.3/次</td></tr>
+        <tr><td>服务模式</td><td>预约→排队→面谈/交付</td><td class="highlight">随时填写，即时生成</td></tr>
+        <tr><td>覆盖面</td><td>取决于单个顾问/机构专长</td><td class="highlight">5-6个模块覆盖面试全流程</td></tr>
+        <tr><td>数据安全</td><td>顾问/机构服务器存储</td><td class="highlight">仅存本地浏览器</td></tr>
+        <tr><td>分析一致性</td><td>受顾问个人状态、偏好影响</td><td class="highlight">AI客观一致，标准统一</td></tr>
+        <tr><td>地域限制</td><td>一线城市才有优质服务</td><td class="highlight">有网络就能用</td></tr>
+        <tr><td>可复制性</td><td>每次重新沟通，效率低</td><td class="highlight">数据复用，越用越精准</td></tr>
+        <tr><td>7×24可用</td><td class="cross">×</td><td class="highlight">随时随地</td></tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     适用人群
+     ============================================================ -->
+<section class="section section-dark">
+  <div class="container">
+    <div class="section-label">适用人群</div>
+    <h2>谁适合用AI面试官？</h2>
+    <p class="lead">无论你是求职者还是招聘方，都能找到对应的工具。</p>
+
+    <h3 style="color:#07c160;margin-top:32px;">🎯 候选人端</h3>
+    <div class="value-grid">
+      <div class="value-card">
+        <div class="icon">🎓</div>
+        <h4>应届毕业生</h4>
+        <p>没有面试经验？模拟面试功能帮你反复练习，简历生成功能帮你从零开始打造专业简历。</p>
+      </div>
+      <div class="value-card">
+        <div class="icon">🔄</div>
+        <h4>正在跳槽的职场人</h4>
+        <p>简历需要更新、面试需要准备、薪资需要谈判——五大模块一站式帮你完成跳槽全流程。</p>
+      </div>
+      <div class="value-card">
+        <div class="icon">📈</div>
+        <h4>准备晋升面试的人</h4>
+        <p>内部晋升面试和外部面试一样重要。模拟面试帮你提前演练，谈薪指导帮你争取更好的薪酬包。</p>
+      </div>
+      <div class="value-card">
+        <div class="icon">🛡️</div>
+        <h4>刚拿到Offer的新人</h4>
+        <p>试用期是最大风险窗口。试用期护航模块提供三阶段融入计划，帮你平稳度过前90天。</p>
+      </div>
+    </div>
+
+    <h3 style="color:#5b6eff;margin-top:40px;">🏢 HR端</h3>
+    <div class="value-grid">
+      <div class="value-card">
+        <div class="icon">🏢</div>
+        <h4>中小型企业HR</h4>
+        <p>一个人负责全流程招聘，没有专业招聘团队支持。六大模块帮你从JD到入职系统化管理招聘。</p>
+      </div>
+      <div class="value-card">
+        <div class="icon">🏭</div>
+        <h4>快速扩张期的公司</h4>
+        <p>招聘需求大、节奏快。简历筛选和面试题库功能帮你规模化提升招聘效率。</p>
+      </div>
+      <div class="value-card">
+        <div class="icon">🎯</div>
+        <h4>业务部门面试官</h4>
+        <p>不是专业HR但要面试候选人？面试题库+面试分析帮你设计专业问题、科学评估候选人。</p>
+      </div>
+      <div class="value-card">
+        <div class="icon">🏫</div>
+        <h4>高校就业指导中心</h4>
+        <p>批量管理学生求职。可生成批量激活码，每个学生独立使用AI面试辅导工具。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     FAQ
+     ============================================================ -->
+<section class="section">
+  <div class="container">
+    <div class="section-label">常见问题</div>
+    <h2>FAQ</h2>
+
+    <div class="faq-item">
+      <div class="faq-q">一个激活码可以多个微信使用吗？</div>
+      <div class="faq-a">不可以。一个激活码仅限1个微信账号使用，绑定后不可更换。这是为了防止激活码被私下分享和倒卖，保障付费用户的权益。如需在多个设备上使用，可以通过云端同步功能实现（年卡/半年卡支持）。如果需要给同事或朋友使用，请单独购买激活码。</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">怎么使用？需要下载软件吗？</div>
+      <div class="faq-a">不需要。打开网页链接，输入激活码即可使用。选择功能模块 → 填写你的信息 → AI生成结果。全程浏览器操作，无需安装任何软件。也可以用电脑/手机/平板访问。</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">候选人版和HR版有什么区别？</div>
+      <div class="faq-a">候选人版面向求职者：简历优化/生成、模拟面试、谈薪指导、试用期护航，帮你准备面试拿到Offer。HR版面向招聘方：JD优化、简历筛选、面试题库、面试分析、谈薪策略、试用期管理，帮你提升招聘效率和质量。两者独立激活，互不影响。</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">AI分析和真人顾问有什么区别？</div>
+      <div class="faq-a">AI面试官基于招聘面试的专业框架（STAR法则、能力模型、结构化面试理论等），结合大模型的理解和生成能力。AI会给出诚实、系统、一致的分析。优势在于：成本极低、即时可用、不受情绪和偏见影响、标准统一。但不是"心理按摩"——它给你的是专业分析，不是情感安慰。</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">我的数据安全吗？激活码会不会被别人用？</div>
+      <div class="faq-a">你的数据完全安全：所有简历、面试记录、评估报告等仅保存在浏览器本地存储中，不上传任何第三方服务器。激活码安全方面：一个激活码仅限1个微信使用，绑定后无法被他人使用。即使有人拿到你的激活码，也无法用不同的微信激活。</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">次数用完了怎么办？</div>
+      <div class="faq-a">次数指使用AI功能的次数。用完可以购买新套餐续费，次数和天数都会叠加。建议按需选择：轻度用户选月卡，频繁使用者选半年卡或年卡。年卡候选人版每天约1.4次，HR版每天约1.4次。</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">没有API Key能用吗？</div>
+      <div class="faq-a">可以。系统支持两种模式：① 如果你有API Key（如DeepSeek），可以直接在工具内调用AI获得结果；② 如果没有API Key，可以点击"复制指令"，把生成的AI指令粘贴到免费的DeepSeek（chat.deepseek.com）或Kimi（kimi.moonshot.cn）中使用。两种方式效果相同。</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">可以多设备使用吗？</div>
+      <div class="faq-a">可以。开通云端同步后，你的激活状态和数据会自动在不同设备间同步。切换设备时只需重新登录云端同步即可。体验卡和月卡暂不支持云端同步。</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">HR版可以批量购买吗？</div>
+      <div class="faq-a">可以。企业或高校就业办可以批量采购激活码，每个员工/学生独立使用。支持批量生成激活码，统一管理。请联系客服微信 miaoan1913 获取团购报价。</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     CTA
+     ============================================================ -->
+<section class="cta-section">
+  <h2>用AI重新定义面试</h2>
+  <p>候选人版¥19/月起 · HR版¥99/月起<br>极低成本、即时可用、数据自有、AI深度分析。<br>从今天开始，让AI面试官帮你搞定面试。</p>
+  <div class="cta-row">
+    <a href="#pricing-candidate" class="btn-green">候选人套餐 →</a>
+    <a href="#pricing-hr" class="btn-blue">HR套餐 →</a>
+  </div>
+  <div class="contact-info">
+    客服微信：miaoan1913 · 工作日9:00-21:00<br>
+    激活码购买、批量采购、商务合作，请加微信
+  </div>
+</section>
+
+<footer class="footer">
+  安迪AI调度师 · AI面试官 v1.0 · 客服微信：miaoan1913
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// Product tab switch
+function switchProduct(product) {
+  document.getElementById('tabCandidate').classList.toggle('active', product === 'candidate');
+  document.getElementById('tabHR').classList.toggle('active', product === 'hr');
+  document.getElementById('heroBtnCandidate').style.display = product === 'candidate' ? 'inline-block' : 'none';
+  document.getElementById('heroBtnHR').style.display = product === 'hr' ? 'inline-block' : 'none';
+}
+
+// Purchase flow
+function buyPlan(type, name, price, range) {
+  navigator.clipboard.writeText('miaoan1913').then(function() {
+    var t = document.getElementById('toast');
+    var productName = type === 'candidate' ? 'AI面试辅导' : '企业AI面试官';
+    t.textContent = '✅ 已选「'+productName+' · '+name+'」'+price+'（'+range+'），已复制客服微信 miaoan1913，加好友付款获取激活码';
+    t.className = 'toast' + (type === 'hr' ? ' blue-toast' : '');
+    t.classList.add('show');
+    setTimeout(function() { t.classList.remove('show'); }, 3000);
+  }).catch(function() {
+    var t = document.getElementById('toast');
+    t.textContent = '💬 请联系微信：miaoan1913 获取激活码';
+    t.classList.add('show');
+    setTimeout(function() { t.classList.remove('show'); }, 3000);
+  });
+}
+
+// FAQ toggle
+document.querySelectorAll('.faq-q').forEach(function(q) {
+  q.addEventListener('click', function() {
+    this.parentElement.classList.toggle('open');
+  });
+});
+</script>
+
+</body>
+</html>
