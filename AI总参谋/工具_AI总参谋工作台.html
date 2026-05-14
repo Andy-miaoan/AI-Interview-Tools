@@ -1281,11 +1281,13 @@ function finalizeActivation(pending) {
         }).catch(function() {});
     }
 
-    // 关闭所有弹窗
+    // 关闭所有弹窗，显示主工作台
     var deviceOverlay = document.getElementById('deviceBindOverlay');
     if (deviceOverlay) deviceOverlay.style.display = 'none';
-    var loginOverlay = document.getElementById('loginOverlay');
-    if (loginOverlay) loginOverlay.style.display = 'none';
+    var loginScreen = document.getElementById('loginScreen');
+    if (loginScreen) loginScreen.style.display = 'none';
+    var mainApp = document.getElementById('mainApp');
+    if (mainApp) mainApp.style.display = 'block';
     var errEl = document.getElementById('loginErr');
     if (errEl) errEl.textContent = '';
 
@@ -1310,22 +1312,26 @@ var _origUpdateUserBar = (typeof updateUserBar === 'function') ? updateUserBar :
 updateUserBar = function() {
   var session = JSON.parse(localStorage.getItem('general_active_session') || 'null');
   var nameEl = document.getElementById('userName');
-  var statusEl = document.getElementById('userStatus');
-  var remainEl = document.getElementById('remainCount');
+  var remainEl = document.getElementById('remainingUses');
+  var expiryEl = document.getElementById('expiryDate');
   if (session && session.expiry) {
     if (nameEl) nameEl.textContent = session.customerName || session.deviceId || '用户';
-    if (statusEl) statusEl.textContent = '已激活 · 到期 ' + session.expiry;
-    if (remainEl && session.maxUses > 0) {
-      var hkey = 'general_workbench_history';
-      var hist = JSON.parse(localStorage.getItem(hkey) || '[]');
-      var code = (session.code || '').replace(/[-\s]/g, '').toUpperCase();
-      var since = localStorage.getItem('general_session_' + _hC(code).toString(16)) || '';
-      var used = 0;
-      for (var i = 0; i < hist.length; i++) {
-        if (since && hist[i].timestamp && hist[i].timestamp < since) break;
-        used++;
+    if (expiryEl) expiryEl.textContent = session.expiry;
+    if (remainEl) {
+      if (session.maxUses > 0) {
+        var hkey = 'general_workbench_history';
+        var hist = JSON.parse(localStorage.getItem(hkey) || '[]');
+        var code = (session.code || '').replace(/[-\s]/g, '').toUpperCase();
+        var since = localStorage.getItem('general_session_' + _hC(code).toString(16)) || '';
+        var used = 0;
+        for (var i = 0; i < hist.length; i++) {
+          if (since && hist[i].timestamp && hist[i].timestamp < since) break;
+          used++;
+        }
+        remainEl.textContent = Math.max(0, session.maxUses - used) + '/' + session.maxUses;
+      } else {
+        remainEl.textContent = '不限';
       }
-      remainEl.textContent = '剩余' + Math.max(0, session.maxUses - used) + '/' + session.maxUses + '次';
     }
     return;
   }
