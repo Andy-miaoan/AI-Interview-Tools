@@ -162,8 +162,9 @@ async function generateCode() {
     btn.disabled = true;
     btn.textContent = '⏳ 创建存储...';
 
-    // 创建 JSONBlob 记录
+    // 创建 JSONBlob 记录（离线时本地生成）
     var blobId = '';
+    var isOffline = false;
     try {
         var blobResp = await fetch(JSONBLOB_API, {
             method: 'POST',
@@ -181,10 +182,9 @@ async function generateCode() {
         blobId = location.split('/').pop() || '';
         if (!blobId) throw new Error('no id');
     } catch (e) {
-        btn.disabled = false;
-        btn.textContent = '🎫 生成激活码';
-        showToast('⚠️ 网络不通，请重试（需联网创建存储）');
-        return;
+        blobId = 'local_' + Math.random().toString(36).substring(2, 10) + '_' + Date.now().toString(36);
+        isOffline = true;
+        console.warn('JSONBlob不可用，使用离线模式生成激活码');
     }
 
     var now = new Date();
@@ -202,13 +202,14 @@ async function generateCode() {
     document.getElementById('codeDisplay').textContent = formatted;
     document.getElementById('codeInfo').textContent =
         '到期日：' + expiryStr + ' · 可用次数：' + (uses === 0 ? '不限' : uses + '次') +
-        ' · 客户：' + name + (maxUsers > 0 ? ' · 绑定' + maxUsers + '人' : '');
+        ' · 客户：' + name + (maxUsers > 0 ? ' · 绑定' + maxUsers + '人' : '') +
+        (isOffline ? ' · ⚠️离线模式（设备绑定暂不可用）' : '');
     document.getElementById('output').classList.add('show');
 
     saveHistory(name, formatted, expiryStr, uses, maxUsers);
     btn.disabled = false;
     btn.textContent = '🎫 生成激活码';
-    showToast('✅ 激活码已生成！');
+    showToast(isOffline ? '✅ 激活码已生成（离线模式，激活码仅本机有效）' : '✅ 激活码已生成！');
 }
 
 function copyCode() {

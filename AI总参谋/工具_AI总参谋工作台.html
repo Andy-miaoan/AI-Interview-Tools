@@ -1194,10 +1194,11 @@ activate = async function() {
         return;
     }
 
-    // 远程校验 JSONBlob
+    // 远程校验 JSONBlob（离线码跳过）
     btn.disabled = true; btn.textContent = '⏳ 验证中...';
     var blobId = validation.blobId;
-    if (blobId && blobId.length > 5) {
+    var isOfflineCode = blobId && blobId.indexOf('local_') === 0;
+    if (blobId && blobId.length > 5 && !isOfflineCode) {
         var bindingOK = false;
         for (var retry = 0; retry < 3 && !bindingOK; retry++) {
             try {
@@ -1264,8 +1265,9 @@ function finalizeActivation(pending) {
     localStorage.setItem('general_active_session', JSON.stringify(sessionData));
     localStorage.setItem('general_session_' + _hC(clean).toString(16), new Date().toISOString());
 
-    // 云端绑定设备
-    if (blobId && blobId.length > 5) {
+    // 云端绑定设备（离线码跳过）
+    var isOfflineCode = blobId && blobId.indexOf('local_') === 0;
+    if (blobId && blobId.length > 5 && !isOfflineCode) {
         fetch(BINDING_API_BASE_C + '/' + blobId).then(function(r) {
             if (!r.ok) return;
             var etag = r.headers.get('ETag') || r.headers.get('etag') || '';
@@ -1288,7 +1290,8 @@ function finalizeActivation(pending) {
     if (errEl) errEl.textContent = '';
 
     if (typeof updateUserBar === 'function') updateUserBar();
-    if (typeof showToast === 'function') showToast('✅ 激活成功！欢迎使用AI总参谋');
+    var _offlineMsg = (blobId && blobId.indexOf('local_') === 0) ? '（离线模式）' : '';
+    if (typeof showToast === 'function') showToast('✅ 激活成功！欢迎使用AI总参谋' + _offlineMsg);
     _pendingActivation = null;
 }
 
