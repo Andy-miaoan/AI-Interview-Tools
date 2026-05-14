@@ -225,12 +225,12 @@ function copySendMsg() {
     var info = document.getElementById('codeInfo').textContent;
     if (!code) return;
     var msg = '您好，您的「安迪AI调度师 · AI总参谋」已开通 🎉\n\n' +
-        '📌 工作台：https://andy-miaoan.github.io/AI-Interview-Tools/AI总参谋/工具_AI总参谋工作台_Andy.html\n' +
+        '📌 工作台：https://andy-miaoan.github.io/AI-Interview-Tools/AI总参谋/工具_AI总参谋工作台.html\n' +
         '🔑 激活码：' + code + '\n' +
         '📅 ' + info + '\n\n' +
         '使用步骤：\n' +
         '1. 打开工作台链接\n' +
-        '2. 输入激活码 + 微信号\n' +
+        '2. 输入激活码 → 确认绑定设备\n' +
         '3. 七大功能：经营早报 → 经营分析 → 人才盘点 → 决策沙盘 → 面试题库 → 面试分析 → 试用辅佐\n\n' +
         '💬 客服微信：miaoan1913';
     navigator.clipboard.writeText(msg).then(function() {
