@@ -1558,7 +1558,7 @@ function handleFileUpload(files){
   Array.from(files).forEach(function(file){
     var ext=file.name.split('.').pop().toLowerCase();
     var item=document.createElement('div');item.className='uf-item';
-    item.innerHTML='<span>📄</span><span>'+file.name+'</span><span class="uf-status">解析中...</span>';
+    item.innerHTML='<span>📄</span><span>'+escHtml(file.name)+'</span><span class="uf-status">解析中...</span>';
     listEl.appendChild(item);
     if(ext==='docx'||ext==='doc'){loadMammoth(file,item);}
     else if(ext==='pdf'){loadPdfJs(file,item);}
