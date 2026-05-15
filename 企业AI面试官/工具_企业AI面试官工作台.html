@@ -1936,6 +1936,11 @@ function clearProb(){['prob-position','prob-level','prob-duration','prob-teamsiz
 function clearSalaryHR(){['salaryhr-position','salaryhr-current','salaryhr-expect','salaryhr-budget','salaryhr-fit','salaryhr-perks','salaryhr-note'].forEach(i=>document.getElementById(i).value='');document.getElementById('salaryhr-result').classList.remove('show','loading');document.getElementById('salaryhr-result').textContent='';document.getElementById('salaryhr-copy-area').style.display='none';document.getElementById('next-salaryhr').classList.remove('show')}
 
 (function init(){
+    if (location.search.includes('reset')) {
+        Object.keys(localStorage).filter(k=>k.startsWith('hrpro_')).forEach(k=>localStorage.removeItem(k));
+        document.getElementById('loginScreen').style.display='flex';
+        return;
+    }
     const keys=Object.keys(localStorage).filter(k=>k.startsWith('hrpro_activation_'));
     for(const key of keys){try{const d=JSON.parse(localStorage.getItem(key));if(d&&d.userName&&d.expiry&&new Date()<=new Date(d.expiry+'T23:59:59')){const uk=key.replace('hrpro_activation_','');const u=JSON.parse(localStorage.getItem('hrpro_usage_'+uk)||'{"uses":0}');if(d.maxUses===0||u.uses<d.maxUses){currentSession={code:d.code||'',userName:d.userName,expiry:d.expiry,maxUses:d.maxUses,storageKey:key,blobId:d.blobId||'',remoteUses:0};if(d.blobId){fetch(BINDING_API_BASE+'/'+d.blobId).then(r=>r.json().then(b=>{currentSession.remoteUses=b.totalUses||0;updateUserBar();})).catch(()=>{});}document.getElementById('loginScreen').style.display='none';document.getElementById('mainApp').classList.add('show');if(localStorage.getItem('hrpro_guide_dismissed'))document.getElementById('guideCard').style.display='none';updateUserBar();updateGlobalPositionBar();break}}}catch(e){}}
     if(!currentSession){document.getElementById('loginScreen').style.display='flex';showLastCodeHint();}
