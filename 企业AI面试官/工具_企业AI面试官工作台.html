@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>企业AI面试官 · 安迪 AI调度师</title>
+<title>面试智囊 · 安迪 AI调度师</title>
 <link rel="icon" href="../logo.png" type="image/png">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -307,15 +307,15 @@ textarea:focus,input:focus{outline:none;border-color:#5b6eff;box-shadow:0 0 0 3p
     <div class="login-card">
         <img class="logo-img" src="../logo.png" alt="安迪 AI调度师" onerror="this.style.display='none'">
         <div class="brand">安迪 AI调度师</div>
-        <h2>企业AI面试官</h2>
-        <div class="subt">JD优化 · 简历筛选 · 面试题库 · 面试分析 · 谈薪策略 · 试用期<br>输入激活码开始使用</div>
+        <h2>面试智囊</h2>
+        <div class="subt">你身边的招聘军师 — 面试出题永久免费<br>简历筛选 · 面试分析 · 谈薪策略 · 试用期 · 候选人追踪</div>
         <input type="text" id="activationInput" placeholder="请输入激活码" maxlength="200" autocomplete="off">
         <div class="last-code-hint" id="lastCodeHint" style="display:none" onclick="fillLastCode()"></div>
         <input type="text" id="wechatIdInput" placeholder="微信号（选填，方便客服联系你）" maxlength="100" autocomplete="off" style="margin-top:12px">
         <div style="font-size:11px;color:rgba(255,255,255,.45);margin-top:4px;text-align:left">🔒 一个激活码仅限1个微信使用，不可多设备分享</div>
         <div class="login-err" id="loginErr"></div>
         <button class="btn btn-activate" id="activateBtn" onclick="activate()">🚀 激活使用</button>
-        <button class="btn-free-entry" onclick="enterFreeMode()">🎯 免费试用JD优化</button>
+        <button class="btn-free-entry" onclick="enterFreeMode()">🎯 免费试用面试出题</button>
         <div class="login-info">还没有激活码？<br>💬 加微信：miaoan1913 获取</div>
     </div>
 </div>
@@ -326,7 +326,7 @@ textarea:focus,input:focus{outline:none;border-color:#5b6eff;box-shadow:0 0 0 3p
             <div class="header-logo"><img src="../logo.png" alt="Logo" onerror="this.parentElement.style.display='none'"></div>
             <div>
                 <div class="header-brand">安迪 AI调度师</div>
-                <h1>企业AI面试官</h1>
+                <h1>面试智囊</h1>
             </div>
         </div>
         <div class="user-bar">
@@ -351,9 +351,9 @@ textarea:focus,input:focus{outline:none;border-color:#5b6eff;box-shadow:0 0 0 3p
         <span style="font-size:10px;color:rgba(255,255,255,.2)">（从JD优化或手动添加的岗位自动记录）</span>
     </div>
     <div class="tabs">
-        <button class="tab active" onclick="switchTab('jd')">📋 JD优化</button>
+        <button class="tab active" onclick="switchTab('qbank')">📚 面试出题<span style="font-size:9px;color:#07c160;margin-left:2px">免费</span></button>
+        <button class="tab" onclick="switchTab('jd')">📋 JD优化<span style="font-size:9px;color:#07c160;margin-left:2px">免费</span></button>
         <button class="tab" onclick="switchTab('screen')">🔎 简历筛选</button>
-        <button class="tab" onclick="switchTab('qbank')">📚 面试题库</button>
         <button class="tab" onclick="switchTab('analysis')">🔍 面试分析</button>
         <button class="tab" onclick="switchTab('salaryhr')">💵 谈薪策略</button>
         <button class="tab" onclick="switchTab('probation')">🛡️ 试用期</button>
@@ -1987,10 +1987,11 @@ function enterFreeMode() {
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('mainApp').classList.add('show');
     document.getElementById('userName').textContent = '🎯 免费用户';
-    document.getElementById('remainingUses').textContent = '仅JD优化';
+    document.getElementById('remainingUses').textContent = '面试出题免费';
     document.getElementById('expiryDate').textContent = '—';
     if (localStorage.getItem('hrpro_guide_dismissed')) document.getElementById('guideCard').style.display = 'none';
     updateGlobalPositionBar();
+    switchTab('qbank');
 }
 
 function showActivationPopup() {
