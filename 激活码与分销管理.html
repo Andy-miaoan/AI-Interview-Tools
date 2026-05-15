@@ -553,7 +553,8 @@ let batchResults = [];
 
 // ========== INIT ==========
 function init() {
-  switchProduct('coach');
+  const saved = localStorage.getItem('andy_last_product');
+  switchProduct(saved === 'hr' ? 'hr' : 'coach');
   switchTab('generate');
   renderDistributorSelect();
 }
@@ -562,6 +563,7 @@ init();
 // ========== PRODUCT SWITCH ==========
 function switchProduct(p) {
   currentProduct = p;
+  localStorage.setItem('andy_last_product', p);
   document.querySelectorAll('.product-btn').forEach(b => b.classList.remove('active'));
   document.querySelector(`.product-btn.${p}`).classList.add('active');
 
