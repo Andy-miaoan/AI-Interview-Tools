@@ -2068,21 +2068,18 @@ if (_chiefOrigFinalize) {
         _chiefOrigFinalize(pending);
     };
 }
-// 修复 copyAndOpenAI: 先同步打开窗口（避免弹窗拦截），再异步复制文本
-if (typeof copyAndOpenAI === 'function') {
-    var _origCopyAndOpen = copyAndOpenAI;
-    copyAndOpenAI = function(platform, resultId) {
-        var urls = { 'DeepSeek': 'https://chat.deepseek.com/', 'Kimi': 'https://kimi.moonshot.cn/', '豆包': 'https://www.doubao.com/chat/', '通义千问': 'https://tongyi.aliyun.com/qianwen/' };
-        var w = window.open(urls[platform] || urls['DeepSeek'], '_blank', 'noopener');
-        var textEl = document.getElementById(resultId);
-        var text = textEl ? textEl.textContent : '';
-        navigator.clipboard.writeText(text).then(function() {
-            showToast('✅ 已复制！已打开 ' + platform);
-        }).catch(function() {
-            showToast('⚠️ 复制失败，请手动复制', true);
-        });
-    };
-}
+// 定义全局 copyAndOpenAI: 先同步打开窗口（避免弹窗拦截），再异步复制文本
+window.copyAndOpenAI = function(platform, resultId) {
+    var urls = { 'DeepSeek': 'https://chat.deepseek.com/', 'Kimi': 'https://kimi.moonshot.cn/', '豆包': 'https://www.doubao.com/chat/', '通义千问': 'https://tongyi.aliyun.com/qianwen/' };
+    window.open(urls[platform] || urls['DeepSeek'], '_blank', 'noopener');
+    var textEl = document.getElementById(resultId);
+    var text = textEl ? textEl.textContent : '';
+    navigator.clipboard.writeText(text).then(function() {
+        showToast('✅ 已复制！已打开 ' + platform);
+    }).catch(function() {
+        showToast('⚠️ 复制失败，请手动复制', true);
+    });
+};
 </script>
 
 <div class="activation-popup-overlay" id="activationPopup">
