@@ -302,8 +302,8 @@ tr:hover td{background:rgba(255,255,255,.012)}
     </div>
   </div>
   <div class="product-switch">
-    <button class="product-btn coach active" onclick="switchProduct('coach')">AI面试辅导</button>
-    <button class="product-btn hr" onclick="switchProduct('hr')">企业AI面试官</button>
+    <button class="product-btn coach active" onclick="switchProduct('coach')">面试私教</button>
+    <button class="product-btn hr" onclick="switchProduct('hr')">面试智囊</button>
   </div>
 </header>
 
@@ -470,8 +470,8 @@ tr:hover td{background:rgba(255,255,255,.012)}
       <div style="margin-bottom:20px">
         <select id="dashFilter" onchange="renderDashboard()" class="coach-focus" style="width:auto;min-width:160px">
           <option value="all">全部产品</option>
-          <option value="coach">AI面试辅导</option>
-          <option value="hr">企业AI面试官</option>
+          <option value="coach">面试私教</option>
+          <option value="hr">面试智囊</option>
         </select>
       </div>
       <div class="table-wrap" id="dashTable">
@@ -538,8 +538,8 @@ var _$=(function(){var _x=String.fromCharCode,_c=[55,50,61,50,63,49,81,88,83,80,
 const JSONBLOB_API = 'https://jsonblob.com/api/jsonBlob';
 const PLAN_DAYS = { trial:3, week:7, month:30, quarter:90, halfyear:180, year:365 };
 const PRODUCT_META = {
-  coach: { name:'AI面试辅导', id:'coach' },
-  hr: { name:'企业AI面试官', id:'hr' }
+  coach: { name:'面试私教', id:'coach' },
+  hr: { name:'面试智囊', id:'hr' }
 };
 const PRICES = {
   coach: { trial:0, week:9, month:19, quarter:99, halfyear:99, year:199 },
@@ -748,8 +748,8 @@ function copySendMsg() {
   const custName = document.getElementById('custName').value.trim() || '客户';
   const meta = PRODUCT_META[currentProduct];
   const urls = {
-    coach: 'https://andy-miaoan.github.io/AI-Interview-Tools/AI面试辅导/工具_AI面试辅导工作台.html',
-    hr: 'https://andy-miaoan.github.io/AI-Interview-Tools/企业AI面试官/工具_企业AI面试官工作台.html'
+    coach: 'https://andy-miaoan.github.io/AI-Interview-Tools/面试私教/工具_面试私教工作台.html',
+    hr: 'https://andy-miaoan.github.io/AI-Interview-Tools/面试智囊/工具_面试智囊工作台.html'
   };
   const features = {
     coach: '📝 简历优化 — 诊断结构/逐段改写/匹配度分析\n📄 简历生成 — STAR法则/数据化表达/可直接投递\n🎤 模拟面试 — 逐题追问/即时点评/评估报告\n💰 谈薪指导 — 三套方案/每轮话术/陷阱应对\n🛡️ 试用期护航 — 三阶段计划/风险预警/汇报话术',
