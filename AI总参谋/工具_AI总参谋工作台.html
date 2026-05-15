@@ -2005,6 +2005,7 @@ function saveResultToVault(category,title,content){if(!content||content.indexOf(
 var chiefAppActivated = false;
 function enterFreeMode() {
     chiefAppActivated = false;
+    currentSession = null;
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('mainApp').style.display = 'block';
     var nameEl = document.getElementById('userName');
@@ -2033,6 +2034,7 @@ async function activateFromPopup() {
     var sessionData = { code: input, expiry: validation.expiry, maxUses: validation.maxUses, customerName: validation.customerName || '用户', blobId: validation.blobId || '', deviceId: 'device_' + Math.random().toString(36).substring(2, 10), activatedAt: new Date().toISOString() };
     localStorage.setItem(storageKey, JSON.stringify(sessionData));
     localStorage.setItem('general_active_session', JSON.stringify(sessionData));
+    localStorage.setItem('general_session_' + (typeof _hC === 'function' ? _hC(clean).toString(16) : clean), new Date().toISOString());
     currentSession = { code: input, userName: validation.customerName || '用户', expiry: validation.expiry, maxUses: validation.maxUses, storageKey: storageKey };
     chiefAppActivated = true;
     hideActivationPopup();
