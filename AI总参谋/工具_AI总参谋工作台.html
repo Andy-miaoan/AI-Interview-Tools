@@ -2096,6 +2096,306 @@ window.copyAndOpenAI = function(platform, resultId) {
         showToast('⚠️ 复制失败，请手动复制', true);
     });
 };
+
+// ════ 付费功能兜底实现 ════
+// 以下函数原本在混淆IIFE内且无window赋值，onclick无法访问，在此重新实现
+
+// 全局模式状态
+var currentBizMode = 'monthly';
+var currentOnboardMode = 'plan';
+
+// ── 模式切换 ──
+if (typeof switchBizMode === 'undefined') {
+  window.switchBizMode = function(mode) {
+    currentBizMode = mode;
+    var mEl = document.getElementById('mode-monthly');
+    var qEl = document.getElementById('mode-quarterly');
+    var mf = document.getElementById('monthlyFields');
+    var qf = document.getElementById('quarterlyFields');
+    if (mEl) mEl.classList.toggle('active', mode === 'monthly');
+    if (qEl) qEl.classList.toggle('active', mode === 'quarterly');
+    if (mf) mf.style.display = mode === 'quarterly' ? 'none' : '';
+    if (qf) qf.style.display = mode === 'quarterly' ? '' : 'none';
+  };
+}
+if (typeof switchOnboardMode === 'undefined') {
+  window.switchOnboardMode = function(mode) {
+    currentOnboardMode = mode;
+    var pEl = document.getElementById('mode-plan');
+    var rEl = document.getElementById('mode-risk');
+    var pf = document.getElementById('planFields');
+    var rf = document.getElementById('riskFields');
+    if (pEl) pEl.classList.toggle('active', mode === 'plan');
+    if (rEl) rEl.classList.toggle('active', mode === 'risk');
+    if (pf) pf.style.display = mode === 'risk' ? 'none' : '';
+    if (rf) rf.style.display = mode === 'risk' ? '' : 'none';
+  };
+}
+
+// ── 清空函数 ──
+function _clearPanel(panelId, resultId, copyBtnId, msg) {
+  if (!confirm(msg || '确认清空所有填写内容？')) return;
+  document.querySelectorAll('#' + panelId + ' input, #' + panelId + ' textarea').forEach(function(el) { el.value = ''; });
+  var r = document.getElementById(resultId);
+  if (r) r.classList.remove('show');
+  var c = document.getElementById(copyBtnId);
+  if (c) c.style.display = 'none';
+  if (typeof showToast === 'function') showToast('已清空');
+}
+if (typeof clearBiz === 'undefined') { window.clearBiz = function() { _clearPanel('panel-biz', 'biz-result', 'biz-copy-btn', '确认清空所有经营分析填写内容？'); }; }
+if (typeof clearTalent === 'undefined') { window.clearTalent = function() { _clearPanel('panel-talent', 'talent-result', 'talent-copy-btn', '确认清空所有人才盘点填写内容？'); }; }
+if (typeof clearDecision === 'undefined') { window.clearDecision = function() { _clearPanel('panel-decision', 'decision-result', 'decision-copy-btn', '确认清空所有决策沙盘填写内容？'); }; }
+if (typeof clearExamBank === 'undefined') { window.clearExamBank = function() { _clearPanel('panel-exambank', 'exambank-result', 'exambank-copy-btn', '确认清空所有面试题库填写内容？'); }; }
+if (typeof clearExamAnalyze === 'undefined') { window.clearExamAnalyze = function() { _clearPanel('panel-examanalyze', 'examanalyze-result', 'examanalyze-copy-btn', '确认清空所有面试分析填写内容？'); }; }
+if (typeof clearOnboard === 'undefined') { window.clearOnboard = function() { _clearPanel('panel-onboard', 'onboard-result', 'onboard-copy-btn', '确认清空所有试用辅佐填写内容？'); }; }
+
+// ── 通用取值 ──
+function _v(id) { var el = document.getElementById(id); return el ? (el.value || '').trim() : ''; }
+function _showResult(resultId, copyBtnId, text) {
+  var r = document.getElementById(resultId);
+  var c = document.getElementById(copyBtnId);
+  if (r) { r.textContent = text; r.classList.add('show'); r.classList.remove('loading'); }
+  if (c) c.style.display = '';
+  if (typeof saveResultToVault === 'function') {
+    var titles = { 'biz-result': '经营分析', 'talent-result': '人才盘点', 'decision-result': '决策沙盘', 'exambank-result': '面试题库', 'examanalyze-result': '面试分析', 'onboard-result': '试用辅佐' };
+    saveResultToVault(titles[resultId] || '分析结果', titles[resultId] || '分析结果', text);
+  }
+}
+
+// ── 提示词构建函数 ──
+function buildMonthlyPrompt() {
+  var rev = _v('biz-month-revenue') || '【未提供】';
+  var cost = _v('biz-month-cost') || '【未提供】';
+  var worry = _v('biz-month-worry') || '【未提供】';
+  var expense = _v('biz-month-expense') || '【未提供】';
+  var profit = _v('biz-month-profit') || '【未提供】';
+  var cashflow = _v('biz-month-cashflow') || '【未提供】';
+  var cash = _v('biz-month-cash') || '【未提供】';
+  var ar = _v('biz-month-ar') || '【未提供】';
+  var ap = _v('biz-month-ap') || '【未提供】';
+  var orders = _v('biz-month-orders') || '【未提供】';
+  var customers = _v('biz-month-customers') || '【未提供】';
+  var channels = _v('biz-month-channels') || '【未提供】';
+  var products = _v('biz-month-products') || '【未提供】';
+  var delivery = _v('biz-month-delivery') || '【未提供】';
+  var complaints = _v('biz-month-complaints') || '【未提供】';
+  var inventory = _v('biz-month-inventory') || '【未提供】';
+  var projects = _v('biz-month-projects') || '【未提供】';
+  var headcount = _v('biz-month-headcount') || '【未提供】';
+  var laborcost = _v('biz-month-laborcost') || '【未提供】';
+  var turnover = _v('biz-month-turnover') || '【未提供】';
+  var coreposts = _v('biz-month-coreposts') || '【未提供】';
+  return '你是一位资深企业经营顾问。请基于以下本月经营数据，为企业做一份月度经营分析报告。\n\n' +
+    '【核心数据】\n- 本月营收：' + rev + '\n- 本月成本：' + cost + '\n- 当前最头疼的问题：' + worry + '\n\n' +
+    '【财务深度】\n- 费用明细：' + expense + '\n- 净利润：' + profit + '\n- 现金流：' + cashflow + '\n- 现金余额：' + cash + '\n- 应收账款：' + ar + '\n- 应付账款：' + ap + '\n\n' +
+    '【业务增长】\n- 订单量/签约额：' + orders + '\n- 新增客户数：' + customers + '\n- 渠道表现：' + channels + '\n- 产品/服务表现：' + products + '\n\n' +
+    '【运营效率】\n- 交付/履约情况：' + delivery + '\n- 客户投诉/退单：' + complaints + '\n- 库存/产能状态：' + inventory + '\n- 重点项目进展：' + projects + '\n\n' +
+    '【人力效能】\n- 员工总数：' + headcount + '\n- 人力成本占比：' + laborcost + '\n- 人员流动率：' + turnover + '\n- 核心岗位空缺：' + coreposts + '\n\n' +
+    '请输出：1) 经营健康度评分（满分100）2) 三个最需要关注的风险点 3) 本月最应该做的三个决策建议 4) 下月重点行动清单。';
+}
+
+function buildQuarterlyPrompt() {
+  var rev = _v('biz-q-revenue') || '【未提供】';
+  var totalcost = _v('biz-q-totalcost') || '【未提供】';
+  var worry = _v('biz-q-worry') || '【未提供】';
+  var profit = _v('biz-q-profit') || '【未提供】';
+  var cashflow = _v('biz-q-cashflow') || '【未提供】';
+  var arap = _v('biz-q-arap') || '【未提供】';
+  var orders = _v('biz-q-orders') || '【未提供】';
+  var customers = _v('biz-q-customers') || '【未提供】';
+  var channels = _v('biz-q-channels') || '【未提供】';
+  var products = _v('biz-q-products') || '【未提供】';
+  var funnel = _v('biz-q-funnel') || '【未提供】';
+  var returns = _v('biz-q-returns') || '【未提供】';
+  var satisfaction = _v('biz-q-satisfaction') || '【未提供】';
+  var inventory = _v('biz-q-inventory') || '【未提供】';
+  var supply = _v('biz-q-supply') || '【未提供】';
+  var projects = _v('biz-q-projects') || '【未提供】';
+  var headcount = _v('biz-q-headcount') || '【未提供】';
+  var laborcost = _v('biz-q-laborcost') || '【未提供】';
+  var turnover = _v('biz-q-turnover') || '【未提供】';
+  var hiring = _v('biz-q-hiring') || '【未提供】';
+  var culture = _v('biz-q-culture') || '【未提供】';
+  return '你是一位资深企业经营顾问。请基于以下本季度经营数据，为企业做一份季度经营分析报告。\n\n' +
+    '【核心数据】\n- 本季度营收：' + rev + '\n- 本季度总成本：' + totalcost + '\n- 当前最头疼的问题：' + worry + '\n\n' +
+    '【财务深度】\n- 净利润：' + profit + '\n- 现金流：' + cashflow + '\n- 应收应付：' + arap + '\n\n' +
+    '【业务增长】\n- 订单量/签约额：' + orders + '\n- 新增客户数：' + customers + '\n- 渠道表现：' + channels + '\n- 产品线表现：' + products + '\n- 销售漏斗：' + funnel + '\n\n' +
+    '【运营效率】\n- 退单/退款率：' + returns + '\n- 客户满意度：' + satisfaction + '\n- 库存/产能：' + inventory + '\n- 供应链：' + supply + '\n- 重点项目：' + projects + '\n\n' +
+    '【人力效能】\n- 员工总数：' + headcount + '\n- 人力成本占比：' + laborcost + '\n- 人员流动率：' + turnover + '\n- 招聘进展：' + hiring + '\n- 企业文化：' + culture + '\n\n' +
+    '请输出：1) 季度经营趋势分析（与本季度目标对比）2) 战略风险评估 3) 下季度战略重点建议 4) 资源配置优化建议。';
+}
+
+function buildOnboardPlanPrompt() {
+  var pos = _v('onboard-position') || '【请填写】';
+  var stage = _v('onboard-stage') || '【请填写】';
+  var teamsize = _v('onboard-teamsize') || '【请填写】';
+  var battles = _v('onboard-battles') || '【请填写】';
+  var culture = _v('onboard-culture') || '【请填写】';
+  return '你是一位资深企业教练，专门帮老板处理高管试用期的疑难问题。请为以下新高管制定90天融入计划。\n\n' +
+    '【基本信息】\n- 职位：' + pos + '\n- 当前阶段：' + stage + '\n- 管理团队规模：' + teamsize + '\n\n' +
+    '【关键信息】\n- 需要打赢的仗：' + battles + '\n- 公司文化特点：' + culture + '\n\n' +
+    '请输出：1) 前30天/60天/90天分阶段计划 2) 每阶段的关键里程碑和验收标准 3) 老板应该做什么（行动清单）4) 风险预警信号和应对预案。';
+}
+
+function buildOnboardRiskPrompt() {
+  var pos = _v('onboard-risk-pos') || '【请填写】';
+  var time = _v('onboard-risk-time') || '【请填写】';
+  var obs = _v('onboard-risk-obs') || '【请填写观察到的具体表现】';
+  var worry = _v('onboard-risk-worry') || '【请填写】';
+  return '你是一位资深企业教练，专门帮老板处理高管试用期的疑难问题。以下是试用期高管的风险评估请求。\n\n' +
+    '【基本信息】\n- 职位：' + pos + '\n- 已入职时间：' + time + '\n\n' +
+    '【观察到的表现】\n' + obs + '\n\n' +
+    '【老板的担忧】\n' + worry + '\n\n' +
+    '请输出：1) 风险等级评估（红/黄/绿）及理由 2) 具体问题诊断（能力/文化/动力/关系）3) 止损决策框架（什么情况下应该果断止损）4) 整改建议和谈话要点。';
+}
+
+// ── 六大核心功能 ──
+if (typeof processBiz === 'undefined') {
+  window.processBiz = function() {
+    var result = document.getElementById('biz-result');
+    var copyBtn = document.getElementById('biz-copy-btn');
+    if (result) { result.classList.add('show', 'loading'); result.textContent = '正在生成经营分析报告…'; }
+    if (copyBtn) copyBtn.style.display = 'none';
+    useOneCredit(function() {
+      var prompt = currentBizMode === 'quarterly' ? buildQuarterlyPrompt() : buildMonthlyPrompt();
+      var profile = (typeof getCompanyProfileText === 'function' ? getCompanyProfileText() : '');
+      var full = (profile ? profile + '\n\n' : '') + prompt;
+      _showResult('biz-result', 'biz-copy-btn', full);
+      showToast('✅ 经营分析报告已生成');
+    }, function() {
+      if (result) { result.classList.remove('loading'); result.textContent = '生成失败，请重试'; }
+    });
+  };
+}
+
+if (typeof processTalent === 'undefined') {
+  window.processTalent = function() {
+    var result = document.getElementById('talent-result');
+    var copyBtn = document.getElementById('talent-copy-btn');
+    if (result) { result.classList.add('show', 'loading'); result.textContent = '正在生成人才盘点报告…'; }
+    if (copyBtn) copyBtn.style.display = 'none';
+    useOneCredit(function() {
+      var stage = _v('talent-stage') || '【未提供】';
+      var goals = _v('talent-goals') || '【未提供】';
+      var list = _v('talent-list') || '【未提供】';
+      var worry = _v('talent-worry') || '【未提供】';
+      var prompt = '你是一位资深人力资源顾问，专门帮老板进行高管团队人才盘点。请基于以下信息做人才盘点分析。\n\n' +
+        '【企业阶段】' + stage + '\n【年度战略目标】' + goals + '\n【核心团队成员】\n' + list + '\n【最担心的人才问题】' + worry + '\n\n' +
+        '请输出：1) 九宫格人才分布（横轴业绩、纵轴潜力，列出每位成员在九宫格中的位置）2) TOP3离职风险人员及挽留建议 ' +
+        '3) 团队能力缺口分析（当前缺少什么关键能力）4) 人才梯队建设建议（谁可以培养接班谁）5) 薪酬竞争力判断。';
+      var profile = (typeof getCompanyProfileText === 'function' ? getCompanyProfileText() : '');
+      var full = (profile ? profile + '\n\n' : '') + prompt;
+      _showResult('talent-result', 'talent-copy-btn', full);
+      showToast('✅ 人才盘点报告已生成');
+    }, function() {
+      if (result) { result.classList.remove('loading'); result.textContent = '生成失败，请重试'; }
+    });
+  };
+}
+
+if (typeof processDecision === 'undefined') {
+  window.processDecision = function() {
+    var result = document.getElementById('decision-result');
+    var copyBtn = document.getElementById('decision-copy-btn');
+    if (result) { result.classList.add('show', 'loading'); result.textContent = '正在生成决策分析…'; }
+    if (copyBtn) copyBtn.style.display = 'none';
+    useOneCredit(function() {
+      var question = _v('dec-question') || '【未提供】';
+      var context = _v('dec-context') || '【未提供】';
+      var options = _v('dec-options') || '【未提供】';
+      var risk = _v('dec-risk') || '【未提供】';
+      var deadline = _v('dec-deadline') || '【未提供】';
+      var prompt = '你是一位资深企业战略顾问，专门帮老板做重大决策的推演分析。请对以下决策问题进行沙盘推演。\n\n' +
+        '【决策问题】' + question + '\n【背景与约束】' + context + '\n【可选方案】\n' + options + '\n【风险承受力】' + risk + '\n【决策截止时间】' + deadline + '\n\n' +
+        '请输出：1) 每个方案的概率化推演（最佳/最可能/最坏情况）2) 风险矩阵（每种方案的风险概率×影响程度）' +
+        '3) 前提条件检验（每种方案成立需要哪些前提，这些前提是否成立）4) 推荐方案及理由 5) 如果选择推荐方案，第一步应该做什么。';
+      var profile = (typeof getCompanyProfileText === 'function' ? getCompanyProfileText() : '');
+      var full = (profile ? profile + '\n\n' : '') + prompt;
+      _showResult('decision-result', 'decision-copy-btn', full);
+      showToast('✅ 决策沙盘分析已生成');
+    }, function() {
+      if (result) { result.classList.remove('loading'); result.textContent = '生成失败，请重试'; }
+    });
+  };
+}
+
+if (typeof processExamBank === 'undefined') {
+  window.processExamBank = function() {
+    var result = document.getElementById('exambank-result');
+    var copyBtn = document.getElementById('exambank-copy-btn');
+    if (result) { result.classList.add('show', 'loading'); result.textContent = '正在生成面试题库…'; }
+    if (copyBtn) copyBtn.style.display = 'none';
+    useOneCredit(function() {
+      var position = _v('exam-position') || '【未提供】';
+      var stage = _v('exam-stage') || '【未提供】';
+      var battles = _v('exam-battles') || '【未提供】';
+      var musthave = _v('exam-musthave') || '【未提供】';
+      var worry = _v('exam-worry') || '【未提供】';
+      var prompt = '你是一位资深面试官和人才评估专家。请为以下高管岗位设计一套精准的面试题库。\n\n' +
+        '【招聘岗位】' + position + '\n【企业阶段】' + stage + '\n【该岗位需要打赢的仗】' + battles + '\n【必须具备的能力/经验】' + musthave + '\n【最担心招错的地方】' + worry + '\n\n' +
+        '请按5大维度出题（每维度3-5题，共20题左右）：\n' +
+        '1) 战略思维与商业判断（考察市场洞察、战略规划、商业敏锐度）\n' +
+        '2) 领导力与带团队（考察组建团队、激励下属、处理冲突）\n' +
+        '3) 执行力与结果导向（考察目标拆解、推动落地、克服困难）\n' +
+        '4) 文化与价值观匹配（考察文化契合度、价值观、工作风格）\n' +
+        '5) 学习能力与adaptability（考察自我认知、成长潜力、应对变化）\n\n' +
+        '每道题请标注：考察点、好回答的特征、建议的递进追问。';
+      var profile = (typeof getCompanyProfileText === 'function' ? getCompanyProfileText() : '');
+      var full = (profile ? profile + '\n\n' : '') + prompt;
+      _showResult('exambank-result', 'exambank-copy-btn', full);
+      showToast('✅ 面试题库已生成（共约20题）');
+    }, function() {
+      if (result) { result.classList.remove('loading'); result.textContent = '生成失败，请重试'; }
+    });
+  };
+}
+
+if (typeof processExamAnalyze === 'undefined') {
+  window.processExamAnalyze = function() {
+    var result = document.getElementById('examanalyze-result');
+    var copyBtn = document.getElementById('examanalyze-copy-btn');
+    if (result) { result.classList.add('show', 'loading'); result.textContent = '正在生成面试分析…'; }
+    if (copyBtn) copyBtn.style.display = 'none';
+    useOneCredit(function() {
+      var position = _v('analyze-position') || '【未提供】';
+      var bg = _v('analyze-bg') || '【未提供】';
+      var transcript = _v('analyze-transcript') || '【未提供】';
+      var gut = _v('analyze-gut') || '【未提供】';
+      var prompt = '你是一位资深面试官和人才评估专家。请对以下高管面试进行分析评估。\n\n' +
+        '【面试岗位】' + position + '\n【候选人背景】' + bg + '\n【面试对话记录/关键回答摘要】\n' + transcript + '\n【面试官的直觉感受】' + gut + '\n\n' +
+        '请输出四维评估：\n' +
+        '1) 业绩能力（过往业绩真实性、相关经验匹配度）评分/10 + 证据链分析\n' +
+        '2) 战略思维（商业判断、系统思考、前瞻性）评分/10 + 证据链分析\n' +
+        '3) 领导力（带团队能力、影响力、决策风格）评分/10 + 证据链分析\n' +
+        '4) 文化契合（价值观、工作方式、团队匹配）评分/10 + 证据链分析\n\n' +
+        '综合建议：\n- 总体评分/10 + 推荐等级（强烈推荐/推荐/待定/不推荐）\n- 红旗信号（需要警惕的风险点）\n- 背调重点建议（需要验证的关键信息）\n- 如录用，试用期应重点观察什么。';
+      var profile = (typeof getCompanyProfileText === 'function' ? getCompanyProfileText() : '');
+      var full = (profile ? profile + '\n\n' : '') + prompt;
+      _showResult('examanalyze-result', 'examanalyze-copy-btn', full);
+      showToast('✅ 面试分析报告已生成');
+    }, function() {
+      if (result) { result.classList.remove('loading'); result.textContent = '生成失败，请重试'; }
+    });
+  };
+}
+
+if (typeof processOnboard === 'undefined') {
+  window.processOnboard = function() {
+    var result = document.getElementById('onboard-result');
+    var copyBtn = document.getElementById('onboard-copy-btn');
+    if (result) { result.classList.add('show', 'loading'); result.textContent = '正在生成试用辅佐方案…'; }
+    if (copyBtn) copyBtn.style.display = 'none';
+    useOneCredit(function() {
+      var prompt = currentOnboardMode === 'risk' ? buildOnboardRiskPrompt() : buildOnboardPlanPrompt();
+      var profile = (typeof getCompanyProfileText === 'function' ? getCompanyProfileText() : '');
+      var full = (profile ? profile + '\n\n' : '') + prompt;
+      _showResult('onboard-result', 'onboard-copy-btn', full);
+      showToast('✅ 试用辅佐方案已生成');
+    }, function() {
+      if (result) { result.classList.remove('loading'); result.textContent = '生成失败，请重试'; }
+    });
+  };
+}
 </script>
 
 <div class="activation-popup-overlay" id="activationPopup">
