@@ -2399,8 +2399,7 @@ if (typeof processOnboard === 'undefined') {
 
 // ── 更多关键兜底函数 ──
 
-// 标签页切换
-if (typeof switchTab === 'undefined') {
+// 标签页切换（无条件覆盖PLG包装器）
   window.switchTab = function(tabName) {
     var panels = document.querySelectorAll('.panel');
     panels.forEach(function(p) { p.classList.remove('active'); });
@@ -2411,7 +2410,6 @@ if (typeof switchTab === 'undefined') {
     var activeBtn = document.querySelector('.tab[onclick*="switchTab(\'' + tabName + '\')"]');
     if (activeBtn) activeBtn.classList.add('active');
   };
-}
 
 // 下一步按钮
 if (typeof nextStep === 'undefined') {
