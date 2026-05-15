@@ -281,6 +281,24 @@ textarea:focus,input:focus{outline:none;border-color:#5b6eff;box-shadow:0 0 0 3p
 /* ── 添加下一份简历按钮 ── */
 .btn-add-next{display:inline-flex;align-items:center;gap:4px;background:rgba(91,110,255,.06);border:1px dashed rgba(91,110,255,.2);color:#5b9eff;padding:7px 14px;border-radius:8px;font-size:11px;cursor:pointer;transition:.2s;margin-top:8px;font-family:inherit}
 .btn-add-next:hover{background:rgba(91,110,255,.12);border-style:solid}
+/* ── 激活码弹出窗口 ── */
+.activation-popup-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.78);z-index:1002;display:none;align-items:center;justify-content:center;backdrop-filter:blur(6px)}
+.activation-popup-overlay.show{display:flex}
+.activation-popup-card{background:rgba(16,16,32,.97);border:1px solid rgba(91,110,255,.18);border-radius:18px;padding:36px 28px 24px;max-width:400px;width:92%;text-align:center;box-shadow:0 24px 80px rgba(0,0,0,.6);animation:slideUp .3s ease}
+.activation-popup-card h3{font-size:18px;color:#e0e0ff;margin-bottom:18px;font-weight:600}
+.activation-popup-card input{width:100%;padding:14px 16px;border:1.5px solid rgba(91,110,255,.2);border-radius:12px;font-size:15px;text-align:center;letter-spacing:2px;font-family:'Courier New',monospace;background:rgba(0,0,0,.3);color:#e0e0ff;transition:.25s}
+.activation-popup-card input:focus{outline:none;border-color:#5b6eff;box-shadow:0 0 0 4px rgba(91,110,255,.08)}
+.activation-popup-card input::placeholder{color:rgba(255,255,255,.2);letter-spacing:1px}
+.activation-popup-card .btn-popup-activate{width:100%;padding:13px;border:none;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer;margin-top:14px;transition:.25s;letter-spacing:.5px;background:linear-gradient(135deg,#5b6eff,#4a4fcf);color:#fff;box-shadow:0 4px 16px rgba(91,110,255,.2)}
+.activation-popup-card .btn-popup-activate:hover{transform:translateY(-1px);box-shadow:0 6px 24px rgba(91,110,255,.3)}
+.activation-popup-card .btn-popup-activate:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.activation-popup-card .popup-err{color:#ff6b6b;font-size:12px;margin-top:8px;min-height:18px}
+.activation-popup-card .popup-divider{width:100%;height:1px;background:rgba(255,255,255,.06);margin:20px 0}
+.activation-popup-card .popup-free-notice{font-size:13px;color:rgba(255,255,255,.5);line-height:1.9;margin-bottom:10px}
+.activation-popup-card .popup-free-notice strong{color:#e0e0ff}
+.activation-popup-card .popup-pricing{font-size:11px;color:rgba(255,255,255,.3);margin-top:4px;line-height:1.6}
+.btn-free-entry{width:100%;padding:11px;border:1px dashed rgba(91,110,255,.3);border-radius:12px;font-size:14px;cursor:pointer;margin-top:10px;transition:.25s;letter-spacing:.5px;background:transparent;color:#5b9eff;font-weight:500}
+.btn-free-entry:hover{border-color:#5b6eff;background:rgba(91,110,255,.06)}
 </style>
 </head>
 <body>
@@ -297,6 +315,7 @@ textarea:focus,input:focus{outline:none;border-color:#5b6eff;box-shadow:0 0 0 3p
         <div style="font-size:11px;color:rgba(255,255,255,.45);margin-top:4px;text-align:left">🔒 一个激活码仅限1个微信使用，不可多设备分享</div>
         <div class="login-err" id="loginErr"></div>
         <button class="btn btn-activate" id="activateBtn" onclick="activate()">🚀 激活使用</button>
+        <button class="btn-free-entry" onclick="enterFreeMode()">🎯 免费试用JD优化</button>
         <div class="login-info">还没有激活码？<br>💬 加微信：miaoan1913 获取</div>
     </div>
 </div>
@@ -682,6 +701,19 @@ textarea:focus,input:focus{outline:none;border-color:#5b6eff;box-shadow:0 0 0 3p
     </div>
 </div>
 <div class="toast" id="toast"></div>
+
+<!-- ════ 激活码弹出窗口 ════ -->
+<div class="activation-popup-overlay" id="activationPopup">
+    <div class="activation-popup-card">
+        <h3>请输入激活码</h3>
+        <input type="text" id="popupActivationInput" placeholder="XXXX-XXXX-XXXX-XXXX" maxlength="200" autocomplete="off">
+        <div class="popup-err" id="popupErr"></div>
+        <button class="btn-popup-activate" id="popupActivateBtn" onclick="activateFromPopup()">激活</button>
+        <div class="popup-divider"></div>
+        <div class="popup-free-notice">JD优化<strong>永久免费</strong>。<br>其他功能需要激活码。<br>加 <strong>miaoan1913</strong> 获取。</div>
+        <div class="popup-pricing">💰 月卡 ¥99（30次）· 季卡 ¥199（100次）· 年卡 ¥499（500次）</div>
+    </div>
+</div>
 
 <div class="modal-overlay" id="companyProfileModal">
   <div class="modal" style="position:relative">
@@ -1255,6 +1287,7 @@ function activate() {
 
     localStorage.setItem(storageKey, JSON.stringify({ ...validation, code: input }));
     currentSession = { code: input, userName: validation.userName, expiry: validation.expiry, maxUses: validation.maxUses, storageKey };
+    appActivated = true;
 
     if (wechatId) {
         const wxErr = validateWechatId(wechatId);
@@ -1667,7 +1700,7 @@ async function callDeepSeek(s,p) {
 }
 
 // ---- JD优化 ----
-async function processJD() { if(!await checkAndUse())return; const t=document.getElementById('jd-title').value.trim(); const c=document.getElementById('jd-content').value.trim(); const h=document.getElementById('jd-highlights').value.trim(); if(!c){showToast('请粘贴JD原文',true);return} showLoading('jd-result'); document.getElementById('jd-copy-area').style.display='none'; document.getElementById('next-jd').classList.remove('show'); const s='你是懂业务的人力资源顾问。请按以下步骤优化JD：\n步骤1：诊断3个致命问题（吸引力/可筛选性/真实性）\n步骤2：逐项优化-标题含亮点、每条职责给原文→问题→改写范例（禁止"负责/协助/参与"）、任职要求区分硬性vs加分、薪资福利写具体\n步骤3：输出完整优化稿\n步骤4：配套15道分层面试题（初面5+复试5+终面5，每题标考察点+好回答标准）\n规则：JD≤800字，禁止虚词。'; const u=(t?'岗位：'+t+'\n':'')+(h?'公司亮点：'+h+'\n':'')+getCompanyProfilePrompt()+'JD原文：\n'+c; const r=await callDeepSeek(s,u); if(r){showResult('jd-result',r);saveHistory('jd','JD优化',t||'未指定岗位',r); if(t)saveGlobalPosition(t);} else showResult('jd-result','【请复制到任意AI工具处理】\n\n'+s+'\n\n'+u); }
+async function processJD() { const t=document.getElementById('jd-title').value.trim(); const c=document.getElementById('jd-content').value.trim(); const h=document.getElementById('jd-highlights').value.trim(); if(!c){showToast('请粘贴JD原文',true);return} showLoading('jd-result'); document.getElementById('jd-copy-area').style.display='none'; document.getElementById('next-jd').classList.remove('show'); const s='你是懂业务的人力资源顾问。请按以下步骤优化JD：\n步骤1：诊断3个致命问题（吸引力/可筛选性/真实性）\n步骤2：逐项优化-标题含亮点、每条职责给原文→问题→改写范例（禁止"负责/协助/参与"）、任职要求区分硬性vs加分、薪资福利写具体\n步骤3：输出完整优化稿\n步骤4：配套15道分层面试题（初面5+复试5+终面5，每题标考察点+好回答标准）\n规则：JD≤800字，禁止虚词。'; const u=(t?'岗位：'+t+'\n':'')+(h?'公司亮点：'+h+'\n':'')+getCompanyProfilePrompt()+'JD原文：\n'+c; const r=await callDeepSeek(s,u); if(r){showResult('jd-result',r);saveHistory('jd','JD优化',t||'未指定岗位',r); if(t)saveGlobalPosition(t);} else showResult('jd-result','【请复制到任意AI工具处理】\n\n'+s+'\n\n'+u); }
 
 // ---- 简历筛选（支持批量） ----
 async function processScreen() { if(!await checkAndUse())return; const jd=document.getElementById('screen-jd').value.trim(); const cvRaw=document.getElementById('screen-resume').value.trim(); if(!jd||!cvRaw){showToast('请填写JD和简历',true);return} showLoading('screen-result'); document.getElementById('screen-copy-area').style.display='none'; document.getElementById('next-screen').classList.remove('show'); const cvs=cvRaw.split(/\n\s*---\s*\n/).map(c=>c.trim()).filter(c=>c.length>0); const isBatch=cvs.length>1; const s=isBatch?'你是资深招聘顾问。请按以下格式逐份评估并排名：\n\n【排名总表】表格：排名|候选人（简历中提取姓名/编号）|综合分/10|推荐等级|一句话总结\n\n然后每份简历展开：\n【匹配度】X/10\n【亮点】2-3条\n【风险点】1-2条\n【面试建议】推荐/备选/不推荐，如推荐给出3个追问方向\n\n规则：每份评估≤200字，必须有简历中的具体依据。最后给一个"建议面试顺序"。':'你是资深招聘顾问。请评估候选人匹配度：\n【综合评分】X/10\n【匹配点】列出2-3条\n【不匹配点】列出1-2条\n【风险提示】频繁跳槽/经历断档/职级倒退等\n【面试建议】推荐面试/备选/不推荐，如推荐则给出3个重点追问方向\n规则：每个判断需给出简历中的具体依据。'; const u='岗位JD：\n'+jd+'\n\n'+getCompanyProfilePrompt()+(isBatch?'共'+cvs.length+'份简历：\n\n':'候选人简历：\n')+cvs.map((cv,i)=>'【简历'+(i+1)+'】\n'+cv).join('\n\n'); const r=await callDeepSeek(s,u); if(r){showResult('screen-result',r);saveHistory('screen','简历筛选',jd.substring(0,60),r);} else showResult('screen-result','【请复制到任意AI工具处理】\n\n'+s+'\n\n'+u); }
@@ -1942,9 +1975,62 @@ function clearSalaryHR(){['salaryhr-position','salaryhr-current','salaryhr-expec
         return;
     }
     const keys=Object.keys(localStorage).filter(k=>k.startsWith('hrpro_activation_'));
-    for(const key of keys){try{const d=JSON.parse(localStorage.getItem(key));if(d&&d.userName&&d.expiry&&new Date()<=new Date(d.expiry+'T23:59:59')){const uk=key.replace('hrpro_activation_','');const u=JSON.parse(localStorage.getItem('hrpro_usage_'+uk)||'{"uses":0}');if(d.maxUses===0||u.uses<d.maxUses){currentSession={code:d.code||'',userName:d.userName,expiry:d.expiry,maxUses:d.maxUses,storageKey:key,blobId:d.blobId||'',remoteUses:0};if(d.blobId){fetch(BINDING_API_BASE+'/'+d.blobId).then(r=>r.json().then(b=>{currentSession.remoteUses=b.totalUses||0;updateUserBar();})).catch(()=>{});}document.getElementById('loginScreen').style.display='none';document.getElementById('mainApp').classList.add('show');if(localStorage.getItem('hrpro_guide_dismissed'))document.getElementById('guideCard').style.display='none';updateUserBar();updateGlobalPositionBar();break}}}catch(e){}}
+    for(const key of keys){try{const d=JSON.parse(localStorage.getItem(key));if(d&&d.userName&&d.expiry&&new Date()<=new Date(d.expiry+'T23:59:59')){const uk=key.replace('hrpro_activation_','');const u=JSON.parse(localStorage.getItem('hrpro_usage_'+uk)||'{"uses":0}');if(d.maxUses===0||u.uses<d.maxUses){currentSession={code:d.code||'',userName:d.userName,expiry:d.expiry,maxUses:d.maxUses,storageKey:key,blobId:d.blobId||'',remoteUses:0};appActivated=true;if(d.blobId){fetch(BINDING_API_BASE+'/'+d.blobId).then(r=>r.json().then(b=>{currentSession.remoteUses=b.totalUses||0;updateUserBar();})).catch(()=>{});}document.getElementById('loginScreen').style.display='none';document.getElementById('mainApp').classList.add('show');if(localStorage.getItem('hrpro_guide_dismissed'))document.getElementById('guideCard').style.display='none';updateUserBar();updateGlobalPositionBar();break}}}catch(e){}}
     if(!currentSession){document.getElementById('loginScreen').style.display='flex';showLastCodeHint();}
 })();
+// ════ 单功能免费模式 ════
+let appActivated = false;
+
+function enterFreeMode() {
+    appActivated = false;
+    currentSession = null;
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('mainApp').classList.add('show');
+    document.getElementById('userName').textContent = '🎯 免费用户';
+    document.getElementById('remainingUses').textContent = '仅JD优化';
+    document.getElementById('expiryDate').textContent = '—';
+    if (localStorage.getItem('hrpro_guide_dismissed')) document.getElementById('guideCard').style.display = 'none';
+    updateGlobalPositionBar();
+}
+
+function showActivationPopup() {
+    document.getElementById('popupErr').textContent = '';
+    document.getElementById('popupActivationInput').value = '';
+    document.getElementById('activationPopup').classList.add('show');
+}
+
+function hideActivationPopup() {
+    document.getElementById('activationPopup').classList.remove('show');
+}
+
+async function activateFromPopup() {
+    const input = document.getElementById('popupActivationInput').value.trim();
+    const errEl = document.getElementById('popupErr');
+    const btn = document.getElementById('popupActivateBtn');
+    if (!input) { errEl.textContent = '请输入激活码'; return; }
+
+    const validation = validateCode(input);
+    if (!validation.valid) { errEl.textContent = validation.error; return; }
+
+    const storageKey = 'hrpro_activation_' + _h(input.replace(/[-\s]/g, '').toUpperCase()).toString(16);
+    localStorage.setItem(storageKey, JSON.stringify({ ...validation, code: input }));
+
+    currentSession = { code: input, userName: validation.userName, expiry: validation.expiry, maxUses: validation.maxUses, storageKey };
+    appActivated = true;
+    hideActivationPopup();
+    updateUserBar();
+    showToast('✅ 激活成功！所有功能已解锁');
+}
+
+// Override checkAndUse to show popup for non-free features
+const _originalCheckAndUse = checkAndUse;
+checkAndUse = async function() {
+    if (!appActivated && !currentSession) {
+        showActivationPopup();
+        return false;
+    }
+    return await _originalCheckAndUse();
+};
 </script>
 </body>
 </html>
