@@ -343,7 +343,7 @@ textarea::placeholder,input::placeholder{color:rgba(255,255,255,.15)}
 #uploadedFilesList .uf-item{display:flex;align-items:center;gap:8px;padding:6px 10px;background:rgba(255,255,255,.02);border-radius:6px;margin-bottom:4px}
 #uploadedFilesList .uf-status{font-size:10px;margin-left:auto;font-weight:500}
 #uploadedFilesList .uf-status.ok{color:#48c78e}
-#uploadedFilesList .uf-status.err{color:#ff6b6b}
+.btn-free-entry{width:100%;padding:13px;border:1.5px dashed rgba(212,175,55,.35);border-radius:12px;font-size:15px;font-weight:600;cursor:pointer;margin-top:10px;transition:.25s;letter-spacing:.5px;background:transparent;color:#e0c04a;font-family:inherit}.btn-free-entry:hover{border-color:#d4af37;background:rgba(212,175,55,.06);transform:translateY(-1px)}.activation-popup-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.75);z-index:1000;display:none;align-items:center;justify-content:center;backdrop-filter:blur(6px)}.activation-popup-overlay.show{display:flex}.activation-popup-card{position:relative;background:rgba(10,16,10,.97);border:1px solid rgba(212,175,55,.15);border-radius:18px;padding:36px 28px;max-width:380px;width:90%;text-align:center;box-shadow:0 24px 80px rgba(0,0,0,.6);animation:slideUp .3s ease}.activation-popup-card h3{font-size:18px;color:#f0e0b0;margin-bottom:20px;font-weight:600}.activation-popup-card input{width:100%;padding:12px 16px;border:1.5px solid rgba(212,175,55,.2);border-radius:12px;font-size:16px;text-align:center;letter-spacing:2px;font-family:'Courier New',monospace;background:rgba(0,0,0,.3);color:#f0e0b0;transition:.25s}.activation-popup-card input:focus{outline:none;border-color:#d4af37;box-shadow:0 0 0 4px rgba(212,175,55,.08)}.activation-popup-card input::placeholder{color:rgba(255,255,255,.2)}.btn-popup-activate{width:100%;padding:12px;border:none;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer;margin-top:14px;transition:.25s;background:linear-gradient(135deg,#e0c04a,#c9a520,#b8950e);color:#0a0a0a;box-shadow:0 4px 20px rgba(212,175,55,.18);font-family:inherit}.btn-popup-activate:hover{transform:translateY(-1px);box-shadow:0 6px 28px rgba(212,175,55,.28)}.popup-err{color:#ff6b6b;font-size:12px;margin-top:8px;min-height:18px}.popup-divider{margin:20px 0;border-top:1px solid rgba(255,255,255,.08)}.popup-free-notice{font-size:13px;color:rgba(255,255,255,.55);line-height:1.8}.popup-free-notice strong{color:#e0c04a}.popup-pricing{margin-top:14px;font-size:11px;color:#ffd54f;line-height:1.6}.popup-close{position:absolute;top:12px;right:16px;font-size:20px;color:rgba(255,255,255,.3);cursor:pointer;background:none;border:none;font-family:inherit}.popup-close:hover{color:rgba(255,255,255,.7)}
 </style>
 </head>
 <body>
@@ -360,6 +360,7 @@ textarea::placeholder,input::placeholder{color:rgba(255,255,255,.15)}
         <div class="login-hint" id="loginHint" style="display:none;font-size:11px;color:rgba(212,175,55,.5);margin-bottom:6px;cursor:pointer" onclick="fillLastCode()" title="点击填入上次使用的激活码">💾 上次使用：<span id="lastCodeHint"></span></div>
         <div class="login-err" id="loginErr"></div>
         <button class="btn btn-activate" id="activateBtn" onclick="activate()">激活使用</button>
+        <button class="btn-free-entry" onclick="enterFreeMode()">🎯 免费试用经营早报</button>
         <div class="login-info">还没有激活码？<br>💬 加微信：miaoan1913 获取<br><br>💰 月卡 ¥999(30次) · 半年卡 ¥4999(200次) · 年卡 ¥9999(500次)<br><br><span id="syncStatusLogin" style="cursor:pointer;color:rgba(212,175,55,.6);font-size:11px;text-decoration:underline" onclick="showTokenSetup()">⚙️ 设置云端同步（跨设备共享次数）</span><br><br><span style="cursor:pointer;color:rgba(212,175,55,.5);font-size:10px;text-decoration:underline" onclick="document.getElementById('aiGuide').style.display=document.getElementById('aiGuide').style.display==='none'?'':'none'">💡 不知道怎么用AI工具？点击查看推荐</span></div>
         <div id="aiGuide" style="display:none;text-align:left;font-size:11px;color:rgba(255,255,255,.55);margin-top:8px;line-height:2;padding:10px 14px;background:rgba(255,255,255,.02);border-radius:8px">
             <strong style="color:rgba(212,175,55,.7)">推荐AI工具（均免费注册）：</strong><br>
@@ -1108,7 +1109,7 @@ textarea::placeholder,input::placeholder{color:rgba(255,255,255,.15)}
 <script>
 // ════ 激活码验证系统（v2 — 支持新旧两种格式） ════
 var _$C=(function(){var _x=String.fromCharCode,_a=[55,50,61,50,63,49,81,88,83,80,59,36,47,56,43,33,35,46,42,50,92,95,66,71,45,56,49,44],_v='';for(var _i=0;_i<_a.length;_i++)_v+=_x(_a[_i]^(_i+90));return _v;})();
-// 自包含签名激活码 — 无需外部存储
+var BINDING_API_BASE_C = 'https://jsonblob.com/api/jsonBlob';
 function _dC(encoded, key) {
     try {
         encoded = encoded.replace(/[\._]/g, function(c) { return ({'.':'+','_':'/'}[c]); });
@@ -1146,21 +1147,9 @@ function validateChiefCode(rawCode) {
     if (!payload) return { valid: false, error: '激活码数据损坏' };
     var parts = payload.split('|');
     if (parts.length < 5) return { valid: false, error: '激活码格式不完整' };
-    var expiry = parts[0], maxUses = parseInt(parts[1]) || 0, customerName = parts[2], maxBindings = 1;
-    // 兼容新旧格式: v1=7段(含blobId), v2=6段(含签名)
-    if (parts.length >= 7) {
-        // v1 旧格式: expiry|uses|name|random|blobId|maxBindings
-        maxBindings = parseInt(parts[5]) || 1;
-    } else {
-        // v2 新格式: expiry|uses|name|random|maxBindings|signature
-        maxBindings = parseInt(parts[4]) || 1;
-        var signature = parts[5];
-        var unsignedPayload = parts.slice(0, 5).join('|');
-        var expectedSig = _hC(unsignedPayload + _$C).toString(16).slice(0, 8).toUpperCase();
-        if (signature !== expectedSig) return { valid: false, error: '激活码签名无效（请确认是从客服获取的正版激活码）' };
-    }
+    var expiry = parts[0], maxUses = parseInt(parts[1]) || 0, customerName = parts[2], blobId = parts[4], maxBindings = parseInt(parts[5]) || 1;
     if (new Date() > new Date(expiry + 'T23:59:59')) return { valid: false, error: '激活码已过期（到期日：' + expiry + '），请续费' };
-    return { valid: true, expiry: expiry, maxUses: maxUses, customerName: customerName, maxBindings: maxBindings, code: rawCode };
+    return { valid: true, expiry: expiry, maxUses: maxUses, customerName: customerName, blobId: blobId, maxBindings: maxBindings, code: rawCode };
 }
 function getChiefUsage(input) {
     var clean = input.replace(/[-\s]/g, '').toUpperCase();
@@ -1181,7 +1170,7 @@ function getChiefUsage(input) {
 // 覆盖原 activate() 函数（AI总参谋使用设备绑定流程，无微信号输入）
 var _origActivate = (typeof activate === 'function') ? activate : null;
 var _pendingActivation = null; // 暂存待绑定的激活信息
-activate = function() {
+activate = async function() {
     var inputEl = document.getElementById('activationInput');
     var errEl = document.getElementById('loginErr');
     var btn = document.getElementById('activateBtn');
@@ -1204,6 +1193,37 @@ activate = function() {
     if (validation.maxUses > 0 && usage.uses >= validation.maxUses) {
         errEl.textContent = '使用次数已用完（' + validation.maxUses + '/' + validation.maxUses + '），请联系续费';
         return;
+    }
+
+    // 远程校验 JSONBlob（离线码跳过）
+    btn.disabled = true; btn.textContent = '⏳ 验证中...';
+    var blobId = validation.blobId;
+    var isOfflineCode = blobId && blobId.indexOf('local_') === 0;
+    if (blobId && blobId.length > 5 && !isOfflineCode) {
+        var bindingOK = false;
+        for (var retry = 0; retry < 3 && !bindingOK; retry++) {
+            try {
+                var getResp = await fetch(BINDING_API_BASE_C + '/' + blobId);
+                if (!getResp.ok) break;
+                var blob = await getResp.json();
+                var bindings = blob.bindings || [];
+                if (bindings.length >= (validation.maxBindings || 1)) {
+                    btn.disabled = false; btn.textContent = '🚀 激活使用';
+                    errEl.textContent = '该激活码绑定设备已达上限（' + (validation.maxBindings || 1) + '台）';
+                    return;
+                }
+                bindingOK = true;
+            } catch (e) {
+                console.warn('JSONBlob不可用，跳过远程校验:', e.message);
+                bindingOK = true; // 离线兜底
+                break;
+            }
+        }
+        if (!bindingOK) {
+            btn.disabled = false; btn.textContent = '🚀 激活使用';
+            errEl.textContent = '远程验证失败，请检查网络后重试';
+            return;
+        }
     }
 
     // 暂存验证结果，弹出设备绑定确认
@@ -1231,19 +1251,36 @@ function finalizeActivation(pending) {
     var clean = pending.clean;
     var storageKey = pending.storageKey;
     var input = pending.code;
+    var blobId = validation.blobId;
 
     var sessionData = {
         code: input,
         expiry: validation.expiry,
         maxUses: validation.maxUses,
         customerName: validation.customerName,
-        maxBindings: validation.maxBindings,
+        blobId: validation.blobId,
         deviceId: 'device_' + Math.random().toString(36).substring(2, 10),
         activatedAt: new Date().toISOString()
     };
     localStorage.setItem(storageKey, JSON.stringify(sessionData));
     localStorage.setItem('general_active_session', JSON.stringify(sessionData));
     localStorage.setItem('general_session_' + _hC(clean).toString(16), new Date().toISOString());
+
+    // 云端绑定设备（离线码跳过）
+    var isOfflineCode = blobId && blobId.indexOf('local_') === 0;
+    if (blobId && blobId.length > 5 && !isOfflineCode) {
+        fetch(BINDING_API_BASE_C + '/' + blobId).then(function(r) {
+            if (!r.ok) return;
+            var etag = r.headers.get('ETag') || r.headers.get('etag') || '';
+            return r.json().then(function(b) {
+                var bindings = b.bindings || [];
+                bindings.push({ deviceId: sessionData.deviceId, activatedAt: sessionData.activatedAt });
+                var h = { 'Content-Type': 'application/json' };
+                if (etag) h['If-Match'] = etag;
+                return fetch(BINDING_API_BASE_C + '/' + blobId, { method: 'PUT', headers: h, body: JSON.stringify({ bindings: bindings, maxBindings: b.maxBindings, totalUses: (b.totalUses || 0) + 1, product: b.product, createdAt: b.createdAt }) });
+            });
+        }).catch(function() {});
+    }
 
     // 关闭所有弹窗，显示主工作台
     var deviceOverlay = document.getElementById('deviceBindOverlay');
@@ -1256,7 +1293,8 @@ function finalizeActivation(pending) {
     if (errEl) errEl.textContent = '';
 
     if (typeof updateUserBar === 'function') updateUserBar();
-    if (typeof showToast === 'function') showToast('✅ 激活成功！欢迎使用AI总参谋');
+    var _offlineMsg = (blobId && blobId.indexOf('local_') === 0) ? '（离线模式）' : '';
+    if (typeof showToast === 'function') showToast('✅ 激活成功！欢迎使用AI总参谋' + _offlineMsg);
     _pendingActivation = null;
 }
 
@@ -1440,19 +1478,10 @@ function toggleLayer(id) {
 var _nextStepMap={'biz':'ns-biz','talent':'ns-talent','decision':'ns-decision','exambank':'ns-exambank','examanalyze':'ns-examanalyze','onboard':'ns-onboard'};
 var __originalSwitchTab=typeof switchTab==='function'?switchTab:function(){};
 switchTab=function(tab){
-  // 切换 tab 按钮样式
-  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});
-  var tabEl=document.querySelector('.tab[data-tab="'+tab+'"]');
-  if(tabEl)tabEl.classList.add('active');
-  // 切换 panel 面板显示
-  document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active');});
-  var panel=document.getElementById('panel-'+tab);
-  if(panel)panel.classList.add('active');
-  // 全局位置栏 + 历史回溯
+  __originalSwitchTab(tab);
   updateGlobalPositionBar();
-  if(typeof showLastHistory==='function')showLastHistory(tab);
-  // 滚动
   setTimeout(function(){
+    var panel=document.getElementById('panel-'+tab);
     if(panel)panel.scrollIntoView({behavior:'smooth',block:'start'});
   },100);
 };
@@ -1799,8 +1828,21 @@ function showBizHealthScore(score){
   if(resultBox&&resultBox.parentNode)resultBox.parentNode.insertBefore(div,resultBox);
 }
 
-
-
+// 覆盖 switchTab: 加入 last-history 提示
+(function(){
+  var tabs=['biz','talent','decision','exambank','examanalyze','onboard'];
+  tabs.forEach(function(t){
+    var origSwitch=window['switchTab'];
+    if(typeof origSwitch==='function'){
+      var orig=origSwitch;
+      window.switchTab=function(name){
+        var result=orig.apply(this,arguments);
+        setTimeout(function(){showLastHistory(name);},100);
+        return result;
+      };
+    }
+  });
+})();
 
 // 覆盖 showResult: 经营分析结果出来后显示健康分 + 历史对比按钮 + 更新统计
 (function(){
@@ -1957,6 +1999,87 @@ function saveReportToVault(){
 function openReportDetail(id){var reports=getReports();var r=reports.find(function(x){return x.id===id;});if(!r)return;closeReportVault();openReportAddForm(id);var oldDel=document.getElementById('ram-delete-btn');if(oldDel)oldDel.remove();var btnRow=document.querySelector('#reportAddModal .btn-row');if(btnRow){var delBtn=document.createElement('button');delBtn.id='ram-delete-btn';delBtn.className='btn btn-secondary';delBtn.style.cssText='color:#ff6b6b;border-color:rgba(255,107,107,.3)';delBtn.textContent='🗑️ 删除此报告';delBtn.onclick=function(){deleteReportFromVault(r.id);};btnRow.appendChild(delBtn);}}
 function deleteReportFromVault(id){if(!confirm('确认删除此报告？'))return;var reports=getReports();reports=reports.filter(function(x){return x.id!==id;});saveReports(reports);closeReportAddModal();renderReportVaultList();openReportVault();if(typeof showToast==='function')showToast('已删除');}
 function saveResultToVault(category,title,content){if(!content||content.indexOf('【请复制')===0)return;var reports=getReports();reports.unshift({id:Date.now().toString(36)+Math.random().toString(36).substring(2,6),title:title,category:category,source:'workbench',content:content.substring(0,30000),createdAt:new Date().toLocaleString('zh-CN'),isoTime:new Date().toISOString()});if(reports.length>100)reports=reports.slice(0,100);saveReports(reports);if(typeof showToast==='function')showToast('✅ 已自动存入报告存储');}
+
+
+// ════ 单功能免费 PLG 模式 ════
+var chiefAppActivated = false;
+function enterFreeMode() {
+    chiefAppActivated = false;
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('mainApp').style.display = 'block';
+    var nameEl = document.getElementById('userName');
+    var remainEl = document.getElementById('remainingUses');
+    var expiryEl = document.getElementById('expiryDate');
+    if (nameEl) nameEl.textContent = '🎯 免费用户';
+    if (remainEl) remainEl.textContent = '仅经营早报';
+    if (expiryEl) expiryEl.textContent = '—';
+}
+function showActivationPopup() {
+    document.getElementById('popupErr').textContent = '';
+    document.getElementById('popupActivationInput').value = '';
+    document.getElementById('activationPopup').classList.add('show');
+}
+function hideActivationPopup() { document.getElementById('activationPopup').classList.remove('show'); }
+async function activateFromPopup() {
+    var input = document.getElementById('popupActivationInput').value.trim();
+    var errEl = document.getElementById('popupErr');
+    var btn = document.getElementById('popupActivateBtn');
+    if (!input) { errEl.textContent = '请输入激活码'; return; }
+    var validation = typeof validateChiefCode === 'function' ? validateChiefCode(input) : (typeof validateCode === 'function' ? validateCode(input) : null);
+    if (!validation) { errEl.textContent = '验证系统不可用'; return; }
+    if (!validation.valid) { errEl.textContent = validation.error; return; }
+    var clean = input.replace(/[-\s]/g, '').toUpperCase();
+    var storageKey = 'general_activation_' + (typeof _hC === 'function' ? _hC(clean).toString(16) : clean);
+    var sessionData = { code: input, expiry: validation.expiry, maxUses: validation.maxUses, customerName: validation.customerName || '用户', blobId: validation.blobId || '', deviceId: 'device_' + Math.random().toString(36).substring(2, 10), activatedAt: new Date().toISOString() };
+    localStorage.setItem(storageKey, JSON.stringify(sessionData));
+    localStorage.setItem('general_active_session', JSON.stringify(sessionData));
+    currentSession = { code: input, userName: validation.customerName || '用户', expiry: validation.expiry, maxUses: validation.maxUses, storageKey: storageKey };
+    chiefAppActivated = true;
+    hideActivationPopup();
+    if (typeof updateUserBar === 'function') updateUserBar();
+    if (typeof showToast === 'function') showToast('✅ 激活成功！所有功能已解锁');
+}
+// 拦截 useOneCredit —— 未激活时弹窗
+var _chiefOrigUseOneCredit = typeof useOneCredit === 'function' ? useOneCredit : null;
+if (_chiefOrigUseOneCredit) {
+    useOneCredit = function(fn, errCb) {
+        if (!chiefAppActivated && !currentSession) { showActivationPopup(); return false; }
+        return _chiefOrigUseOneCredit(fn, errCb);
+    };
+}
+// 在 logout 中重置 chiefAppActivated
+var _chiefOrigLogout = typeof logout === 'function' ? logout : null;
+if (_chiefOrigLogout) {
+    logout = function() {
+        chiefAppActivated = false;
+        _chiefOrigLogout();
+    };
+}
+// 在 finalizeActivation 中设置 chiefAppActivated 和 currentSession
+var _chiefOrigFinalize = typeof finalizeActivation === 'function' ? finalizeActivation : null;
+if (_chiefOrigFinalize) {
+    finalizeActivation = function(pending) {
+        chiefAppActivated = true;
+        if (pending && pending.validation) {
+            currentSession = { code: pending.code, userName: pending.validation.customerName || '用户', expiry: pending.validation.expiry, maxUses: pending.validation.maxUses, storageKey: pending.storageKey };
+        }
+        _chiefOrigFinalize(pending);
+    };
+}
 </script>
+
+<div class="activation-popup-overlay" id="activationPopup">
+    <div class="activation-popup-card">
+        <button class="popup-close" onclick="hideActivationPopup()">×</button>
+        <h3>请输入激活码</h3>
+        <input type="text" id="popupActivationInput" placeholder="XXXX-XXXX-XXXX-XXXX" maxlength="250" autocomplete="off">
+        <div class="popup-err" id="popupErr"></div>
+        <button class="btn-popup-activate" id="popupActivateBtn" onclick="activateFromPopup()">激活</button>
+        <div class="popup-divider"></div>
+        <div class="popup-free-notice">经营早报<strong>永久免费</strong>。<br>其他功能需要激活码。<br>加 <strong>miaoan1913</strong> 获取。</div>
+        <div class="popup-pricing">💰 月卡 ¥999（30次）· 半年卡 ¥4999（200次）· 年卡 ¥9999（500次）</div>
+    </div>
+</div>
+
 </body>
 </html>
