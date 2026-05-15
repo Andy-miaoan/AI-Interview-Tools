@@ -343,7 +343,7 @@ textarea::placeholder,input::placeholder{color:rgba(255,255,255,.15)}
 #uploadedFilesList .uf-item{display:flex;align-items:center;gap:8px;padding:6px 10px;background:rgba(255,255,255,.02);border-radius:6px;margin-bottom:4px}
 #uploadedFilesList .uf-status{font-size:10px;margin-left:auto;font-weight:500}
 #uploadedFilesList .uf-status.ok{color:#48c78e}
-#uploadedFilesList .uf-status.err{color:#ff6b6b}
+.btn-free-entry{width:100%;padding:13px;border:1.5px dashed rgba(212,175,55,.35);border-radius:12px;font-size:15px;font-weight:600;cursor:pointer;margin-top:10px;transition:.25s;letter-spacing:.5px;background:transparent;color:#e0c04a;font-family:inherit}.btn-free-entry:hover{border-color:#d4af37;background:rgba(212,175,55,.06);transform:translateY(-1px)}.activation-popup-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.75);z-index:1000;display:none;align-items:center;justify-content:center;backdrop-filter:blur(6px)}.activation-popup-overlay.show{display:flex}.activation-popup-card{position:relative;background:rgba(10,16,10,.97);border:1px solid rgba(212,175,55,.15);border-radius:18px;padding:36px 28px;max-width:380px;width:90%;text-align:center;box-shadow:0 24px 80px rgba(0,0,0,.6);animation:slideUp .3s ease}.activation-popup-card h3{font-size:18px;color:#f0e0b0;margin-bottom:20px;font-weight:600}.activation-popup-card input{width:100%;padding:12px 16px;border:1.5px solid rgba(212,175,55,.2);border-radius:12px;font-size:16px;text-align:center;letter-spacing:2px;font-family:'Courier New',monospace;background:rgba(0,0,0,.3);color:#f0e0b0;transition:.25s}.activation-popup-card input:focus{outline:none;border-color:#d4af37;box-shadow:0 0 0 4px rgba(212,175,55,.08)}.activation-popup-card input::placeholder{color:rgba(255,255,255,.2)}.btn-popup-activate{width:100%;padding:12px;border:none;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer;margin-top:14px;transition:.25s;background:linear-gradient(135deg,#e0c04a,#c9a520,#b8950e);color:#0a0a0a;box-shadow:0 4px 20px rgba(212,175,55,.18);font-family:inherit}.btn-popup-activate:hover{transform:translateY(-1px);box-shadow:0 6px 28px rgba(212,175,55,.28)}.popup-err{color:#ff6b6b;font-size:12px;margin-top:8px;min-height:18px}.popup-divider{margin:20px 0;border-top:1px solid rgba(255,255,255,.08)}.popup-free-notice{font-size:13px;color:rgba(255,255,255,.55);line-height:1.8}.popup-free-notice strong{color:#e0c04a}.popup-pricing{margin-top:14px;font-size:11px;color:#ffd54f;line-height:1.6}.popup-close{position:absolute;top:12px;right:16px;font-size:20px;color:rgba(255,255,255,.3);cursor:pointer;background:none;border:none;font-family:inherit}.popup-close:hover{color:rgba(255,255,255,.7)}
 </style>
 </head>
 <body>
@@ -360,6 +360,7 @@ textarea::placeholder,input::placeholder{color:rgba(255,255,255,.15)}
         <div class="login-hint" id="loginHint" style="display:none;font-size:11px;color:rgba(212,175,55,.5);margin-bottom:6px;cursor:pointer" onclick="fillLastCode()" title="点击填入上次使用的激活码">💾 上次使用：<span id="lastCodeHint"></span></div>
         <div class="login-err" id="loginErr"></div>
         <button class="btn btn-activate" id="activateBtn" onclick="activate()">激活使用</button>
+        <button class="btn-free-entry" onclick="enterFreeMode()">🎯 免费试用经营早报</button>
         <div class="login-info">还没有激活码？<br>💬 加微信：miaoan1913 获取<br><br>💰 月卡 ¥999(30次) · 半年卡 ¥4999(200次) · 年卡 ¥9999(500次)<br><br><span id="syncStatusLogin" style="cursor:pointer;color:rgba(212,175,55,.6);font-size:11px;text-decoration:underline" onclick="showTokenSetup()">⚙️ 设置云端同步（跨设备共享次数）</span><br><br><span style="cursor:pointer;color:rgba(212,175,55,.5);font-size:10px;text-decoration:underline" onclick="document.getElementById('aiGuide').style.display=document.getElementById('aiGuide').style.display==='none'?'':'none'">💡 不知道怎么用AI工具？点击查看推荐</span></div>
         <div id="aiGuide" style="display:none;text-align:left;font-size:11px;color:rgba(255,255,255,.55);margin-top:8px;line-height:2;padding:10px 14px;background:rgba(255,255,255,.02);border-radius:8px">
             <strong style="color:rgba(212,175,55,.7)">推荐AI工具（均免费注册）：</strong><br>
@@ -1998,6 +1999,87 @@ function saveReportToVault(){
 function openReportDetail(id){var reports=getReports();var r=reports.find(function(x){return x.id===id;});if(!r)return;closeReportVault();openReportAddForm(id);var oldDel=document.getElementById('ram-delete-btn');if(oldDel)oldDel.remove();var btnRow=document.querySelector('#reportAddModal .btn-row');if(btnRow){var delBtn=document.createElement('button');delBtn.id='ram-delete-btn';delBtn.className='btn btn-secondary';delBtn.style.cssText='color:#ff6b6b;border-color:rgba(255,107,107,.3)';delBtn.textContent='🗑️ 删除此报告';delBtn.onclick=function(){deleteReportFromVault(r.id);};btnRow.appendChild(delBtn);}}
 function deleteReportFromVault(id){if(!confirm('确认删除此报告？'))return;var reports=getReports();reports=reports.filter(function(x){return x.id!==id;});saveReports(reports);closeReportAddModal();renderReportVaultList();openReportVault();if(typeof showToast==='function')showToast('已删除');}
 function saveResultToVault(category,title,content){if(!content||content.indexOf('【请复制')===0)return;var reports=getReports();reports.unshift({id:Date.now().toString(36)+Math.random().toString(36).substring(2,6),title:title,category:category,source:'workbench',content:content.substring(0,30000),createdAt:new Date().toLocaleString('zh-CN'),isoTime:new Date().toISOString()});if(reports.length>100)reports=reports.slice(0,100);saveReports(reports);if(typeof showToast==='function')showToast('✅ 已自动存入报告存储');}
+
+
+// ════ 单功能免费 PLG 模式 ════
+var chiefAppActivated = false;
+function enterFreeMode() {
+    chiefAppActivated = false;
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('mainApp').style.display = 'block';
+    var nameEl = document.getElementById('userName');
+    var remainEl = document.getElementById('remainingUses');
+    var expiryEl = document.getElementById('expiryDate');
+    if (nameEl) nameEl.textContent = '🎯 免费用户';
+    if (remainEl) remainEl.textContent = '仅经营早报';
+    if (expiryEl) expiryEl.textContent = '—';
+}
+function showActivationPopup() {
+    document.getElementById('popupErr').textContent = '';
+    document.getElementById('popupActivationInput').value = '';
+    document.getElementById('activationPopup').classList.add('show');
+}
+function hideActivationPopup() { document.getElementById('activationPopup').classList.remove('show'); }
+async function activateFromPopup() {
+    var input = document.getElementById('popupActivationInput').value.trim();
+    var errEl = document.getElementById('popupErr');
+    var btn = document.getElementById('popupActivateBtn');
+    if (!input) { errEl.textContent = '请输入激活码'; return; }
+    var validation = typeof validateChiefCode === 'function' ? validateChiefCode(input) : (typeof validateCode === 'function' ? validateCode(input) : null);
+    if (!validation) { errEl.textContent = '验证系统不可用'; return; }
+    if (!validation.valid) { errEl.textContent = validation.error; return; }
+    var clean = input.replace(/[-\s]/g, '').toUpperCase();
+    var storageKey = 'general_activation_' + (typeof _hC === 'function' ? _hC(clean).toString(16) : clean);
+    var sessionData = { code: input, expiry: validation.expiry, maxUses: validation.maxUses, customerName: validation.customerName || '用户', blobId: validation.blobId || '', deviceId: 'device_' + Math.random().toString(36).substring(2, 10), activatedAt: new Date().toISOString() };
+    localStorage.setItem(storageKey, JSON.stringify(sessionData));
+    localStorage.setItem('general_active_session', JSON.stringify(sessionData));
+    currentSession = { code: input, userName: validation.customerName || '用户', expiry: validation.expiry, maxUses: validation.maxUses, storageKey: storageKey };
+    chiefAppActivated = true;
+    hideActivationPopup();
+    if (typeof updateUserBar === 'function') updateUserBar();
+    if (typeof showToast === 'function') showToast('✅ 激活成功！所有功能已解锁');
+}
+// 拦截 useOneCredit —— 未激活时弹窗
+var _chiefOrigUseOneCredit = typeof useOneCredit === 'function' ? useOneCredit : null;
+if (_chiefOrigUseOneCredit) {
+    useOneCredit = function(fn, errCb) {
+        if (!chiefAppActivated && !currentSession) { showActivationPopup(); return false; }
+        return _chiefOrigUseOneCredit(fn, errCb);
+    };
+}
+// 在 logout 中重置 chiefAppActivated
+var _chiefOrigLogout = typeof logout === 'function' ? logout : null;
+if (_chiefOrigLogout) {
+    logout = function() {
+        chiefAppActivated = false;
+        _chiefOrigLogout();
+    };
+}
+// 在 finalizeActivation 中设置 chiefAppActivated 和 currentSession
+var _chiefOrigFinalize = typeof finalizeActivation === 'function' ? finalizeActivation : null;
+if (_chiefOrigFinalize) {
+    finalizeActivation = function(pending) {
+        chiefAppActivated = true;
+        if (pending && pending.validation) {
+            currentSession = { code: pending.code, userName: pending.validation.customerName || '用户', expiry: pending.validation.expiry, maxUses: pending.validation.maxUses, storageKey: pending.storageKey };
+        }
+        _chiefOrigFinalize(pending);
+    };
+}
 </script>
+
+<div class="activation-popup-overlay" id="activationPopup">
+    <div class="activation-popup-card">
+        <button class="popup-close" onclick="hideActivationPopup()">×</button>
+        <h3>请输入激活码</h3>
+        <input type="text" id="popupActivationInput" placeholder="XXXX-XXXX-XXXX-XXXX" maxlength="250" autocomplete="off">
+        <div class="popup-err" id="popupErr"></div>
+        <button class="btn-popup-activate" id="popupActivateBtn" onclick="activateFromPopup()">激活</button>
+        <div class="popup-divider"></div>
+        <div class="popup-free-notice">经营早报<strong>永久免费</strong>。<br>其他功能需要激活码。<br>加 <strong>miaoan1913</strong> 获取。</div>
+        <div class="popup-pricing">💰 月卡 ¥999（30次）· 半年卡 ¥4999（200次）· 年卡 ¥9999（500次）</div>
+    </div>
+</div>
+
 </body>
 </html>
