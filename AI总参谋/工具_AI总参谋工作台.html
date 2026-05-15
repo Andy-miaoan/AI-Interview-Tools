@@ -2005,6 +2005,7 @@ function saveResultToVault(category,title,content){if(!content||content.indexOf(
 var chiefAppActivated = false;
 function enterFreeMode() {
     chiefAppActivated = false;
+    currentSession = null;
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('mainApp').style.display = 'block';
     var nameEl = document.getElementById('userName');
@@ -2033,6 +2034,7 @@ async function activateFromPopup() {
     var sessionData = { code: input, expiry: validation.expiry, maxUses: validation.maxUses, customerName: validation.customerName || '用户', blobId: validation.blobId || '', deviceId: 'device_' + Math.random().toString(36).substring(2, 10), activatedAt: new Date().toISOString() };
     localStorage.setItem(storageKey, JSON.stringify(sessionData));
     localStorage.setItem('general_active_session', JSON.stringify(sessionData));
+    localStorage.setItem('general_session_' + (typeof _hC === 'function' ? _hC(clean).toString(16) : clean), new Date().toISOString());
     currentSession = { code: input, userName: validation.customerName || '用户', expiry: validation.expiry, maxUses: validation.maxUses, storageKey: storageKey };
     chiefAppActivated = true;
     hideActivationPopup();
@@ -2064,6 +2066,21 @@ if (_chiefOrigFinalize) {
             currentSession = { code: pending.code, userName: pending.validation.customerName || '用户', expiry: pending.validation.expiry, maxUses: pending.validation.maxUses, storageKey: pending.storageKey };
         }
         _chiefOrigFinalize(pending);
+    };
+}
+// 修复 copyAndOpenAI: 先同步打开窗口（避免弹窗拦截），再异步复制文本
+if (typeof copyAndOpenAI === 'function') {
+    var _origCopyAndOpen = copyAndOpenAI;
+    copyAndOpenAI = function(platform, resultId) {
+        var urls = { 'DeepSeek': 'https://chat.deepseek.com/', 'Kimi': 'https://kimi.moonshot.cn/', '豆包': 'https://www.doubao.com/chat/', '通义千问': 'https://tongyi.aliyun.com/qianwen/' };
+        var w = window.open(urls[platform] || urls['DeepSeek'], '_blank', 'noopener');
+        var textEl = document.getElementById(resultId);
+        var text = textEl ? textEl.textContent : '';
+        navigator.clipboard.writeText(text).then(function() {
+            showToast('✅ 已复制！已打开 ' + platform);
+        }).catch(function() {
+            showToast('⚠️ 复制失败，请手动复制', true);
+        });
     };
 }
 </script>
