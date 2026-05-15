@@ -2406,9 +2406,9 @@ if (typeof switchTab === 'undefined') {
     panels.forEach(function(p) { p.classList.remove('active'); });
     var target = document.getElementById('panel-' + tabName);
     if (target) target.classList.add('active');
-    var tabBtns = document.querySelectorAll('.tab-btn');
+    var tabBtns = document.querySelectorAll('.tab');
     tabBtns.forEach(function(b) { b.classList.remove('active'); });
-    var activeBtn = document.querySelector('.tab-btn[onclick*="switchTab(\'' + tabName + '\')"]');
+    var activeBtn = document.querySelector('.tab[onclick*="switchTab(\'' + tabName + '\')"]');
     if (activeBtn) activeBtn.classList.add('active');
   };
 }
