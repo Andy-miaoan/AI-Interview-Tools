@@ -2396,6 +2396,157 @@ if (typeof processOnboard === 'undefined') {
     });
   };
 }
+
+// ── 更多关键兜底函数 ──
+
+// 标签页切换
+if (typeof switchTab === 'undefined') {
+  window.switchTab = function(tabName) {
+    var panels = document.querySelectorAll('.panel');
+    panels.forEach(function(p) { p.classList.remove('active'); });
+    var target = document.getElementById('panel-' + tabName);
+    if (target) target.classList.add('active');
+    var tabBtns = document.querySelectorAll('.tab-btn');
+    tabBtns.forEach(function(b) { b.classList.remove('active'); });
+    var activeBtn = document.querySelector('.tab-btn[onclick*="switchTab(\'' + tabName + '\')"]');
+    if (activeBtn) activeBtn.classList.add('active');
+  };
+}
+
+// 下一步按钮
+if (typeof nextStep === 'undefined') {
+  window.nextStep = function(target) {
+    if (typeof switchTab === 'function') switchTab(target);
+  };
+}
+
+// 分层展开/收起
+if (typeof toggleLayer === 'undefined') {
+  window.toggleLayer = function(layerId) {
+    var el = document.getElementById(layerId);
+    if (el) { el.style.display = el.style.display === 'none' ? '' : 'none'; }
+    var arrow = document.querySelector('[onclick="toggleLayer(\'' + layerId + '\')"]');
+    if (arrow) { arrow.textContent = (el && el.style.display === 'none') ? arrow.textContent.replace('▼', '▶') : arrow.textContent.replace('▶', '▼'); }
+  };
+}
+
+// 经营早报子标签切换
+if (typeof switchBriefingTab === 'undefined') {
+  window.switchBriefingTab = function(tab) {
+    var dailyEl = document.getElementById('briefing-daily');
+    var weeklyEl = document.getElementById('briefing-weekly');
+    if (dailyEl) dailyEl.style.display = tab === 'weekly' ? 'none' : '';
+    if (weeklyEl) weeklyEl.style.display = tab === 'weekly' ? '' : 'none';
+    var btns = document.querySelectorAll('#panel-briefing .mode-btn');
+    btns.forEach(function(b) { b.classList.remove('active'); });
+    var activeBtn = document.querySelector('#panel-briefing .mode-btn[onclick*="switchBriefingTab(\'' + tab + '\')"]');
+    if (activeBtn) activeBtn.classList.add('active');
+  };
+}
+
+// 场景入口切换
+if (typeof switchScenario === 'undefined') {
+  window.switchScenario = function(scenario) {
+    var map = { 'biz': 'biz', 'talent': 'talent', 'decision': 'decision' };
+    var target = map[scenario] || scenario;
+    if (typeof switchTab === 'function') switchTab(target);
+  };
+}
+
+// 清空经营早报
+if (typeof clearBriefing === 'undefined') {
+  window.clearBriefing = function() {
+    if (!confirm('确认清空所有经营早报填写内容？')) return;
+    document.querySelectorAll('#panel-briefing input, #panel-briefing textarea').forEach(function(el) { el.value = ''; });
+    var r = document.getElementById('briefing-result');
+    if (r) { r.classList.remove('show'); r.textContent = ''; }
+    var c = document.getElementById('briefing-copy-btn');
+    if (c) c.style.display = 'none';
+    if (typeof showToast === 'function') showToast('已清空');
+  };
+}
+
+// 生成经营早报（免费功能）
+if (typeof processBriefing === 'undefined') {
+  window.processBriefing = function() {
+    var result = document.getElementById('briefing-result');
+    var copyBtn = document.getElementById('briefing-copy-btn');
+    if (result) { result.classList.add('show', 'loading'); result.textContent = '正在生成经营早报…'; }
+    if (copyBtn) copyBtn.style.display = 'none';
+    try {
+      var date = _v('briefing-date') || new Date().toLocaleDateString('zh-CN');
+      var revenue = _v('briefing-revenue') || '【未填写】';
+      var cost = _v('briefing-cost') || '【未填写】';
+      var keyEvents = _v('briefing-events') || '【未填写】';
+      var todayFocus = _v('briefing-focus') || '【未填写】';
+      var competitor = _v('briefing-competitor') || '【未填写】';
+      var teamMood = _v('briefing-mood') || '【未填写】';
+      var prompt = '你是一位资深企业经营顾问。请基于以下昨日经营数据，为老板生成一份今日经营早报。\n\n' +
+        '【日期】' + date + '\n【昨日营收】' + revenue + '\n【昨日成本/费用】' + cost + '\n【昨日关键事件】' + keyEvents + '\n【今日重点关注】' + todayFocus + '\n【竞品动态】' + competitor + '\n【团队状态】' + teamMood + '\n\n' +
+        '请输出：1) 昨日经营健康度一句话总结（绿灯/黄灯/红灯）2) 今日必看3件事（按优先级排列）3) 今日决策要点（需要老板拍板的1-2件事）4) 风险预警（如有）。格式要求简洁，适合手机阅读。';
+      var profile = (typeof getCompanyProfileText === 'function' ? getCompanyProfileText() : '');
+      var full = (profile ? profile + '\n\n' : '') + prompt;
+      if (result) { result.textContent = full; result.classList.add('show'); result.classList.remove('loading'); }
+      if (copyBtn) copyBtn.style.display = '';
+      if (typeof saveResultToVault === 'function') saveResultToVault('经营早报', '经营早报 ' + date, full);
+      if (typeof showToast === 'function') showToast('✅ 经营早报已生成');
+    } catch(e) {
+      if (result) { result.classList.remove('loading'); result.textContent = '生成失败，请重试'; }
+    }
+  };
+}
+
+// 万能输入框
+if (typeof processUniversalInput === 'undefined') {
+  window.processUniversalInput = function() {
+    var input = document.getElementById('universal-input');
+    var text = input ? input.value.trim() : '';
+    if (!text) { if (typeof showToast === 'function') showToast('请输入您的问题或需求', true); return; }
+    var targetPanel = 'panel-biz';
+    var lower = text.toLowerCase();
+    if (lower.indexOf('人才') >= 0 || lower.indexOf('团队') >= 0 || lower.indexOf('盘点') >= 0) targetPanel = 'panel-talent';
+    else if (lower.indexOf('决策') >= 0 || lower.indexOf('方案') >= 0 || lower.indexOf('推演') >= 0) targetPanel = 'panel-decision';
+    else if (lower.indexOf('面试题') >= 0 || lower.indexOf('题库') >= 0 || lower.indexOf('出题') >= 0) targetPanel = 'panel-exambank';
+    else if (lower.indexOf('面试') >= 0 || lower.indexOf('候选人') >= 0 || lower.indexOf('评估') >= 0) targetPanel = 'panel-examanalyze';
+    else if (lower.indexOf('试用') >= 0 || lower.indexOf('入职') >= 0 || lower.indexOf('新人') >= 0) targetPanel = 'panel-onboard';
+    if (typeof switchTab === 'function') switchTab(targetPanel.replace('panel-', ''));
+    var profile = (typeof getCompanyProfileText === 'function' ? getCompanyProfileText() : '');
+    var full = (profile ? profile + '\n\n' : '') + '你是一位资深企业经营顾问。请帮助分析以下问题：\n\n' + text + '\n\n请提供详细分析和可操作建议。';
+    var resultId = targetPanel.replace('panel-', '') + '-result';
+    var copyBtnId = targetPanel.replace('panel-', '') + '-copy-btn';
+    var r = document.getElementById(resultId);
+    var c = document.getElementById(copyBtnId);
+    if (r) { r.textContent = full; r.classList.add('show'); r.classList.remove('loading'); }
+    if (c) c.style.display = '';
+    if (typeof showToast === 'function') showToast('✅ 已生成分析指令，请点击复制按钮打开DeepSeek');
+  };
+}
+
+// 反馈
+if (typeof submitFeedback === 'undefined') {
+  window.submitFeedback = function(module, title, helpful, btn) {
+    var fbBar = btn ? btn.parentElement : null;
+    if (fbBar) {
+      var thanks = fbBar.querySelector('.fb-thanks');
+      if (thanks) thanks.style.display = '';
+      var btns = fbBar.querySelectorAll('button');
+      btns.forEach(function(b) { b.disabled = true; b.style.opacity = '0.5'; });
+    }
+    if (typeof showToast === 'function') showToast(helpful ? '👍 感谢反馈！' : '👎 感谢反馈，我们会改进');
+  };
+}
+
+// 经营早报子板块切换
+if (typeof switchBriefSection === 'undefined') {
+  window.switchBriefSection = function(section) {
+    var map = { 'daily': 'briefing-daily', 'weekly': 'briefing-weekly' };
+    var target = map[section];
+    if (target) {
+      var el = document.getElementById(target);
+      if (el) el.style.display = el.style.display === 'none' ? '' : 'none';
+    }
+  };
+}
 </script>
 
 <div class="activation-popup-overlay" id="activationPopup">
