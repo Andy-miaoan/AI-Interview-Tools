@@ -2551,16 +2551,19 @@ if (typeof openCompanyProfile === 'undefined') {
   window.openCompanyProfile = function() {
     var el = document.getElementById('companyProfileModal');
     if (el) el.style.display = 'flex';
-    var name = localStorage.getItem('chief_company_name') || '';
-    var industry = localStorage.getItem('chief_company_industry') || '';
-    var size = localStorage.getItem('chief_company_size') || '';
-    var stage = localStorage.getItem('chief_company_stage') || '';
-    var desc = localStorage.getItem('chief_company_desc') || '';
-    document.getElementById('profile-name').value = name;
-    document.getElementById('profile-industry').value = industry;
-    document.getElementById('profile-size').value = size;
-    document.getElementById('profile-stage').value = stage;
-    document.getElementById('profile-desc').value = desc;
+    var profile = null;
+    try { profile = JSON.parse(localStorage.getItem('company_profile') || 'null'); } catch(e) {}
+    if (!profile) profile = {};
+    document.getElementById('cp-name').value = profile.name || '';
+    document.getElementById('cp-industry').value = profile.industry || '';
+    document.getElementById('cp-stage').value = profile.stage || '';
+    document.getElementById('cp-size').value = profile.size || '';
+    document.getElementById('cp-revenue').value = profile.revenue || '';
+    document.getElementById('cp-business').value = profile.business || '';
+    document.getElementById('cp-products').value = profile.products || '';
+    document.getElementById('cp-advantage').value = profile.advantage || '';
+    document.getElementById('cp-challenges').value = profile.challenges || '';
+    document.getElementById('cp-customers').value = profile.customers || '';
   };
 }
 if (typeof closeCompanyProfile === 'undefined') {
@@ -2571,16 +2574,19 @@ if (typeof closeCompanyProfile === 'undefined') {
 }
 if (typeof saveCompanyProfile === 'undefined') {
   window.saveCompanyProfile = function() {
-    var name = document.getElementById('profile-name').value.trim();
-    var industry = document.getElementById('profile-industry').value.trim();
-    var size = document.getElementById('profile-size').value.trim();
-    var stage = document.getElementById('profile-stage').value.trim();
-    var desc = document.getElementById('profile-desc').value.trim();
-    localStorage.setItem('chief_company_name', name);
-    localStorage.setItem('chief_company_industry', industry);
-    localStorage.setItem('chief_company_size', size);
-    localStorage.setItem('chief_company_stage', stage);
-    localStorage.setItem('chief_company_desc', desc);
+    var profile = {
+      name: document.getElementById('cp-name').value.trim(),
+      industry: document.getElementById('cp-industry').value.trim(),
+      stage: document.getElementById('cp-stage').value.trim(),
+      size: document.getElementById('cp-size').value.trim(),
+      revenue: document.getElementById('cp-revenue').value.trim(),
+      business: document.getElementById('cp-business').value.trim(),
+      products: document.getElementById('cp-products').value.trim(),
+      advantage: document.getElementById('cp-advantage').value.trim(),
+      challenges: document.getElementById('cp-challenges').value.trim(),
+      customers: document.getElementById('cp-customers').value.trim()
+    };
+    localStorage.setItem('company_profile', JSON.stringify(profile));
     closeCompanyProfile();
     if (typeof updateProfileIndicators === 'function') updateProfileIndicators();
     if (typeof showToast === 'function') showToast('✅ 公司档案已保存');
@@ -2638,19 +2644,23 @@ if (typeof hideAddCandidateForm === 'undefined') {
 }
 if (typeof addCandidate === 'undefined') {
   window.addCandidate = function() {
-    var name = _v('candidate-name') || '';
-    var position = _v('candidate-position') || '';
-    var status = document.getElementById('candidate-status') ? document.getElementById('candidate-status').value : 'screening';
+    var name = (_v('cand-name') || '').trim();
+    var position = (_v('cand-position') || '').trim();
+    var status = document.getElementById('cand-status') ? document.getElementById('cand-status').value : '筛选';
+    var source = (_v('cand-source') || '').trim();
+    var notes = (_v('cand-notes') || '').trim();
     if (!name || !position) { if (typeof showToast === 'function') showToast('请填写姓名和面试岗位', true); return; }
     var candidates = [];
     try { candidates = JSON.parse(localStorage.getItem('chief_candidates') || '[]'); } catch(e) {}
-    candidates.unshift({ id: Date.now().toString(36) + Math.random().toString(36).substring(2, 6), name: name, position: position, status: status, createdAt: new Date().toLocaleString('zh-CN'), isoTime: new Date().toISOString() });
+    candidates.unshift({ id: Date.now().toString(36) + Math.random().toString(36).substring(2, 6), name: name, position: position, status: status, source: source, notes: notes, createdAt: new Date().toLocaleString('zh-CN'), isoTime: new Date().toISOString() });
     localStorage.setItem('chief_candidates', JSON.stringify(candidates));
     hideAddCandidateForm();
     if (typeof renderCandidateList === 'function') renderCandidateList();
     if (typeof refreshExamCandidateSelects === 'function') refreshExamCandidateSelects();
-    document.getElementById('candidate-name').value = '';
-    document.getElementById('candidate-position').value = '';
+    document.getElementById('cand-name').value = '';
+    document.getElementById('cand-position').value = '';
+    if (document.getElementById('cand-source')) document.getElementById('cand-source').value = '';
+    if (document.getElementById('cand-notes')) document.getElementById('cand-notes').value = '';
     if (typeof showToast === 'function') showToast('✅ 候选人已添加');
   };
 }
@@ -2685,6 +2695,140 @@ if (typeof showTokenSetup === 'undefined') {
     if (token !== null && token.trim()) {
       localStorage.setItem('gh_sync_token', token.trim());
       if (typeof showToast === 'function') showToast('✅ Token 已保存，云端同步已启用');
+    }
+  };
+}
+
+// ── 结果保存到历史（供 _showResult 调用）──
+if (typeof saveResultToVault === 'undefined') {
+  window.saveResultToVault = function(title, subtitle, content) {
+    var history = [];
+    try { history = JSON.parse(localStorage.getItem('chief_history') || '[]'); } catch(e) {}
+    history.unshift({
+      id: Date.now().toString(36) + Math.random().toString(36).substring(2, 6),
+      title: title,
+      subtitle: subtitle,
+      type: 'analysis',
+      content: content,
+      createdAt: new Date().toLocaleString('zh-CN'),
+      isoTime: new Date().toISOString()
+    });
+    if (history.length > 50) history = history.slice(0, 50);
+    localStorage.setItem('chief_history', JSON.stringify(history));
+  };
+}
+
+// ── getCompanyProfileText（构建公司档案文本）──
+if (typeof getCompanyProfileText === 'undefined') {
+  window.getCompanyProfileText = function() {
+    try {
+      var p = JSON.parse(localStorage.getItem('company_profile') || 'null');
+      if (!p || !p.name) return '';
+      return '【公司档案】\n- 公司名称：' + (p.name || '未填') +
+        '\n- 所属行业：' + (p.industry || '未填') +
+        '\n- 发展阶段：' + (p.stage || '未填') +
+        '\n- 员工人数：' + (p.size || '未填') +
+        '\n- 年营收规模：' + (p.revenue || '未填') + ' 万元' +
+        '\n- 主营业务：' + (p.business || '未填') +
+        '\n- 核心产品/服务：' + (p.products || '未填') +
+        '\n- 核心竞争优势：' + (p.advantage || '未填') +
+        '\n- 主要挑战：' + (p.challenges || '未填') +
+        '\n- 目标客户：' + (p.customers || '未填') + '\n\n';
+    } catch(e) { return ''; }
+  };
+}
+
+// ── updateProfileIndicators（更新档案状态指示灯）──
+if (typeof updateProfileIndicators === 'undefined') {
+  window.updateProfileIndicators = function() {
+    var hasProfile = false;
+    try { var p = JSON.parse(localStorage.getItem('company_profile') || 'null'); hasProfile = !!(p && p.name); } catch(e) {}
+    var indicators = document.querySelectorAll('.profile-indicator');
+    for (var i = 0; i < indicators.length; i++) {
+      var el = indicators[i];
+      if (hasProfile) {
+        el.classList.remove('off');
+        try { var p = JSON.parse(localStorage.getItem('company_profile') || '{}'); el.innerHTML = '<span class="pi-dot"></span>已设置公司档案：' + (p.name || '') + ' | ' + (p.industry || '') + ' | ' + (p.size || '') + '人 | ' + (p.stage || '') + ' — <a href="javascript:openCompanyProfile()" style="color:var(--gold);text-decoration:underline">修改</a>'; } catch(e) {}
+      } else {
+        el.classList.add('off');
+        el.innerHTML = '<span class="pi-dot"></span>尚未设置公司档案 — <a href="javascript:openCompanyProfile()" style="color:#ff6b6b;text-decoration:underline">立即设置</a>';
+      }
+    }
+  };
+}
+
+// ── renderHistoryList（渲染历史记录列表）──
+if (typeof renderHistoryList === 'undefined') {
+  window.renderHistoryList = function() {
+    var container = document.getElementById('historyList');
+    if (!container) return;
+    var history = [];
+    try { history = JSON.parse(localStorage.getItem('chief_history') || '[]'); } catch(e) {}
+    var searchEl = document.getElementById('historySearch');
+    var query = searchEl ? (searchEl.value || '').toLowerCase() : '';
+    if (query) {
+      history = history.filter(function(h) {
+        return (h.title || '').toLowerCase().indexOf(query) >= 0 ||
+               (h.subtitle || '').toLowerCase().indexOf(query) >= 0 ||
+               (h.content || '').toLowerCase().indexOf(query) >= 0;
+      });
+    }
+    if (history.length === 0) {
+      container.innerHTML = '<div style="text-align:center;color:rgba(255,255,255,.3);padding:24px">' + (query ? '无匹配记录' : '暂无记录') + '</div>';
+      return;
+    }
+    var html = '';
+    for (var i = 0; i < history.length; i++) {
+      var h = history[i];
+      var preview = (h.content || '').replace(/</g, '&lt;').replace(/>/g, '&gt;').substring(0, 120);
+      html += '<div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:8px;padding:10px 14px;margin-bottom:8px;cursor:pointer" onclick="navigator.clipboard.writeText(this.querySelector(\'.hc-content\').textContent).then(function(){if(typeof showToast===\'function\')showToast(\'\\u2705 \\u5df2\\u590d\\u5236\')})"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span style="font-weight:600;font-size:13px;color:var(--gold)">' + (h.title || '') + '</span><span style="font-size:10px;color:rgba(255,255,255,.35)">' + (h.createdAt || '') + '</span></div><div style="font-size:11px;color:rgba(255,255,255,.5);margin-bottom:4px">' + (h.subtitle || '') + '</div><div class="hc-content" style="font-size:11px;color:rgba(255,255,255,.4);line-height:1.4;max-height:40px;overflow:hidden;white-space:pre-wrap">' + preview + '</div></div>';
+    }
+    container.innerHTML = html;
+  };
+}
+
+// ── renderCandidateList（渲染候选人列表）──
+if (typeof renderCandidateList === 'undefined') {
+  window.renderCandidateList = function() {
+    var container = document.getElementById('candidateList');
+    if (!container) return;
+    var candidates = [];
+    try { candidates = JSON.parse(localStorage.getItem('chief_candidates') || '[]'); } catch(e) {}
+    if (candidates.length === 0) {
+      container.innerHTML = '<div style="text-align:center;color:rgba(255,255,255,.3);padding:24px">暂无追踪人选</div>';
+      return;
+    }
+    var statusColors = {'筛选':'rgba(255,255,255,.4)','面试中':'#4fc3f7','谈薪':'#ffb74d','已录用':'#81c784','试用中':'#64b5f6','已转正':'var(--gold)','已放弃':'#ef5350'};
+    var html = '';
+    for (var i = 0; i < candidates.length; i++) {
+      var c = candidates[i];
+      var sc = statusColors[c.status] || 'rgba(255,255,255,.4)';
+      html += '<div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:8px;padding:10px 14px;margin-bottom:8px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span style="font-weight:600;font-size:13px">' + (c.name || '') + '</span><span style="font-size:11px;color:' + sc + '">' + (c.status || '') + '</span></div><div style="font-size:11px;color:rgba(255,255,255,.4)">' + (c.position || '') + (c.source ? ' | 来源：' + c.source : '') + '</div>' + (c.notes ? '<div style="font-size:10px;color:rgba(255,255,255,.3);margin-top:3px">' + c.notes.substring(0, 80) + '</div>' : '') + '<div style="font-size:10px;color:rgba(255,255,255,.25);margin-top:2px">' + (c.createdAt || '') + '</div></div>';
+    }
+    container.innerHTML = html;
+  };
+}
+
+// ── refreshExamCandidateSelects（刷新面试题候选人下拉）──
+if (typeof refreshExamCandidateSelects === 'undefined') {
+  window.refreshExamCandidateSelects = function() {
+    var candidates = [];
+    try { candidates = JSON.parse(localStorage.getItem('chief_candidates') || '[]'); } catch(e) {}
+    var selects = ['examBank-candidate', 'examAnalyze-candidate'];
+    for (var s = 0; s < selects.length; s++) {
+      var sel = document.getElementById(selects[s]);
+      if (!sel) continue;
+      var currentVal = sel.value || '';
+      sel.innerHTML = '<option value="">-- 选择候选人（可选）--</option>';
+      for (var i = 0; i < candidates.length; i++) {
+        var c = candidates[i];
+        sel.innerHTML += '<option value="' + c.id + '">' + c.name + ' — ' + c.position + '</option>';
+      }
+      if (currentVal) {
+        var found = false;
+        for (var j = 0; j < candidates.length; j++) { if (candidates[j].id === currentVal) { found = true; break; } }
+        if (found) sel.value = currentVal;
+      }
     }
   };
 }
